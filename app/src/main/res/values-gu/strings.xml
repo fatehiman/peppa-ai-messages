@@ -91,6 +91,5 @@
     <string name="archive_confirmation">પાકુ આ %s તમને સંગ્રહાલયમાં નાખવું છે?</string>
     <string name="mms_file_size_limit_none">કોઈ સીમા નહીં</string>
     <string name="empty_archive_confirmation">પાકુ તમને સંગ્રહાલય ખાલી કરવું છે? સંગ્રહિત કરેલા વાતચીતો સદા માટે જતા રહેશે.</string>
-    <string name="app_launcher_name">સંદેશો</string>
     <string name="archive_emptied_successfully">સંગ્રહાલય ખાલી કરી દીધું</string>
 </resources>

@@ -76,7 +76,6 @@
     <string name="add_person">افزودن گیرنده</string>
     <string name="add_a_blocked_keyword">افزودن کلیدواژه‌ی مسدودشده</string>
     <string name="faq_3_text">بله، می‌توانید با نگه‌داشتن دکمه‌ی ارسال و انتخاب تاریخ و ساعت دلخواه، پیام‌ها را برای ارسال در آینده زمان‌بندی کنید.</string>
-    <string name="app_launcher_name">پیام‌ها</string>
     <string name="message_not_sent_short">پیام ارسال نشد</string>
     <string name="attachment">پیوست</string>
     <string name="start_conversation">گفت‌وگویی را آغاز کنید</string>

@@ -177,6 +177,7 @@ class MainActivity : SimpleActivity() {
 
         binding.mainMenu.requireToolbar().setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.show_spam -> launchSpamFolder()
                 R.id.show_recycle_bin -> launchRecycleBin()
                 R.id.show_archived -> launchArchivedConversations()
                 R.id.settings -> launchSettings()
@@ -609,6 +610,11 @@ class MainActivity : SimpleActivity() {
                 (currAdapter as SearchResultsAdapter).updateItems(searchResults, searchedText)
             }
         }
+    }
+
+    private fun launchSpamFolder() {
+        hideKeyboard()
+        startActivity(Intent(applicationContext, SpamMessagesActivity::class.java))
     }
 
     private fun launchRecycleBin() {

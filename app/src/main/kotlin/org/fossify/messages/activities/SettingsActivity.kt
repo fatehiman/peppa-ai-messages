@@ -32,6 +32,7 @@ import org.fossify.commons.models.RadioItem
 import org.fossify.messages.R
 import org.fossify.messages.databinding.ActivitySettingsBinding
 import org.fossify.messages.dialogs.ExportMessagesDialog
+import org.fossify.messages.dialogs.SpamSettingDialog
 import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.emptyMessagesRecycleBin
 import org.fossify.messages.extensions.messagesDB
@@ -46,6 +47,7 @@ import org.fossify.messages.helpers.LOCK_SCREEN_NOTHING
 import org.fossify.messages.helpers.LOCK_SCREEN_SENDER
 import org.fossify.messages.helpers.LOCK_SCREEN_SENDER_MESSAGE
 import org.fossify.messages.helpers.MessagesImporter
+import org.fossify.messages.helpers.SpamFilter
 import org.fossify.messages.helpers.refreshConversations
 import java.util.Locale
 import kotlin.system.exitProcess
@@ -111,6 +113,7 @@ class SettingsActivity : SimpleActivity() {
         setupEnableDeliveryReports()
         setupSendLongMessageAsMMS()
         setupGroupMessageAsMMS()
+        setupSpamFilter()
         setupKeepConversationsArchived()
         setupLockScreenVisibility()
         setupMMSFileSizeLimit()
@@ -132,6 +135,7 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsGeneralSettingsLabel,
             binding.settingsOutgoingMessagesLabel,
             binding.settingsNotificationsLabel,
+            binding.settingsSpamLabel,
             binding.settingsArchivedMessagesLabel,
             binding.settingsRecycleBinLabel,
             binding.settingsSecurityLabel,
@@ -292,6 +296,98 @@ class SettingsActivity : SimpleActivity() {
         settingsSendGroupMessageMmsHolder.setOnClickListener {
             settingsSendGroupMessageMms.toggle()
             config.sendGroupMessageMMS = settingsSendGroupMessageMms.isChecked
+        }
+    }
+
+    // sms-man: AI spam filter
+    private fun setupSpamFilter() = binding.apply {
+        settingsSpamFilterEnabled.isChecked = config.spamFilterEnabled
+        settingsSpamFilterEnabledHolder.setOnClickListener {
+            settingsSpamFilterEnabled.toggle()
+            config.spamFilterEnabled = settingsSpamFilterEnabled.isChecked
+        }
+
+        settingsSpamSkipContacts.isChecked = config.spamSkipContacts
+        settingsSpamSkipContactsHolder.setOnClickListener {
+            settingsSpamSkipContacts.toggle()
+            config.spamSkipContacts = settingsSpamSkipContacts.isChecked
+        }
+
+        settingsSpamSkipCodes.isChecked = config.spamSkipCodes
+        settingsSpamSkipCodesHolder.setOnClickListener {
+            settingsSpamSkipCodes.toggle()
+            config.spamSkipCodes = settingsSpamSkipCodes.isChecked
+        }
+
+        updateSpamTexts()
+        settingsSpamApiUrlHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.spam_api_url,
+                value = config.spamApiUrl,
+                hint = getString(R.string.spam_api_url_hint),
+                isSecret = false,
+                validate = { url ->
+                    if (url.startsWith("https://", ignoreCase = true)) null
+                    else getString(R.string.spam_url_must_be_https)
+                }
+            ) {
+                config.spamApiUrl = it
+                updateSpamTexts()
+            }
+        }
+
+        settingsSpamApiTokenHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.spam_api_token,
+                value = config.spamApiToken,
+                hint = getString(R.string.spam_api_token),
+                isSecret = true,
+                validate = { null }
+            ) {
+                config.spamApiToken = it
+                updateSpamTexts()
+            }
+        }
+
+        settingsSpamTestHolder.setOnClickListener { testSpamApi() }
+
+        settingsSpamAllowedHolder.setOnClickListener {
+            if (config.spamAllowedSenders.isEmpty()) return@setOnClickListener
+            ConfirmationDialog(this@SettingsActivity, getString(R.string.spam_clear_allowed_senders_confirmation)) {
+                config.spamAllowedSenders = emptySet()
+                updateSpamTexts()
+            }
+        }
+    }
+
+    private fun updateSpamTexts() = binding.apply {
+        settingsSpamApiUrl.text = config.spamApiUrl.ifEmpty { getString(R.string.spam_not_set) }
+        val token = config.spamApiToken
+        settingsSpamApiToken.text =
+            if (token.isEmpty()) getString(R.string.spam_not_set)
+            else getString(R.string.spam_token_set, token.takeLast(4))
+        settingsSpamAllowed.text = getString(R.string.spam_allowed_senders, config.spamAllowedSenders.size)
+        settingsSpamTest.text = ""
+        settingsSpamTest.beGone()
+    }
+
+    private fun testSpamApi() {
+        if (config.spamApiUrl.isEmpty() || config.spamApiToken.isEmpty()) {
+            toast(R.string.spam_filter_not_configured)
+            return
+        }
+        binding.settingsSpamTest.beVisible()
+        binding.settingsSpamTest.text = getString(R.string.spam_testing)
+        ensureBackgroundThread {
+            val result = SpamFilter.check(this, "", "sms-man connection test")
+            val text = when (result) {
+                is SpamFilter.Result.Spam -> getString(R.string.spam_test_ok, "true")
+                is SpamFilter.Result.NotSpam -> getString(R.string.spam_test_ok, "false")
+                is SpamFilter.Result.Error -> getString(R.string.spam_test_failed, result.message)
+            }
+            runOnUiThread { binding.settingsSpamTest.text = text }
         }
     }
 

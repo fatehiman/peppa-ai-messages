@@ -140,6 +140,7 @@ import org.fossify.messages.extensions.markMessageRead
 import org.fossify.messages.extensions.markThreadMessagesRead
 import org.fossify.messages.extensions.markThreadMessagesUnread
 import org.fossify.messages.extensions.messagesDB
+import org.fossify.messages.extensions.moveConversationToSpam
 import org.fossify.messages.extensions.moveMessageToRecycleBin
 import org.fossify.messages.extensions.onScroll
 import org.fossify.messages.extensions.removeDiacriticsIfNeeded
@@ -170,6 +171,7 @@ import org.fossify.messages.helpers.PICK_SAVE_DIR_INTENT
 import org.fossify.messages.helpers.PICK_SAVE_FILE_INTENT
 import org.fossify.messages.helpers.PICK_VIDEO_INTENT
 import org.fossify.messages.helpers.SEARCHED_MESSAGE_ID
+import org.fossify.messages.helpers.SpamFilter
 import org.fossify.messages.helpers.THREAD_ATTACHMENT_URI
 import org.fossify.messages.helpers.THREAD_ATTACHMENT_URIS
 import org.fossify.messages.helpers.THREAD_ID
@@ -367,6 +369,8 @@ class ThreadActivity : SimpleActivity() {
             findItem(R.id.block_number).title =
                 getString(org.fossify.commons.R.string.block_number)
             findItem(R.id.block_number).isVisible = !isRecycleBin
+            findItem(R.id.report_spam).isVisible =
+                threadItems.isNotEmpty() && participants.size == 1 && !isRecycleBin
             findItem(R.id.dial_number).isVisible =
                 participants.size == 1 && !isSpecialNumber() && !isRecycleBin
             findItem(R.id.manage_people).isVisible = !isSpecialNumber() && !isRecycleBin
@@ -390,6 +394,7 @@ class ThreadActivity : SimpleActivity() {
     private fun handleMenuItemAction(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             R.id.block_number -> blockNumber()
+            R.id.report_spam -> askReportSpam()
             R.id.delete -> askConfirmDelete()
             R.id.restore -> askConfirmRestoreAll()
             R.id.archive -> archiveConversation()
@@ -1169,6 +1174,24 @@ class ThreadActivity : SimpleActivity() {
                 }
                 refreshConversations()
                 finish()
+            }
+        }
+    }
+
+    private fun askReportSpam() {
+        ConfirmationDialog(this, getString(R.string.report_as_spam_confirmation)) {
+            ensureBackgroundThread {
+                val senders = moveConversationToSpam(threadId)
+                runOnUiThread {
+                    refreshConversations()
+                    toast(R.string.moved_to_spam)
+                    finish()
+                }
+                senders.forEach { sender ->
+                    SpamFilter.sendFeedback(applicationContext, sender, "", spam = true)?.let {
+                        applicationContext.toast(getString(R.string.spam_feedback_failed, it))
+                    }
+                }
             }
         }
     }

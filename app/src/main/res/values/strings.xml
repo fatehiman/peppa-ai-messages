@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_launcher_name">Messages</string>
+    <string name="app_launcher_name">SMS Man</string>
     <string name="type_a_message">Type a message…</string>
     <string name="message_not_sent_short">Message not sent</string>
     <string name="message_not_sent_touch_retry">Not sent. Touch to retry.</string>
@@ -187,4 +187,39 @@
         Haven't found some strings? There's more at
         https://github.com/FossifyOrg/Commons/tree/master/commons/src/main/res
     -->
+
+    <!-- sms-man: AI spam filter -->
+    <string name="spam_folder">Spam</string>
+    <string name="show_spam_folder">Show the spam folder</string>
+    <string name="spam_filter">Spam filter (AI)</string>
+    <string name="spam_filter_enabled">Check new messages with the spam API</string>
+    <string name="spam_api_url">API endpoint URL</string>
+    <string name="spam_api_url_hint">https://example.com/api/sms/check</string>
+    <string name="spam_api_token">API token</string>
+    <string name="spam_not_set">Not set</string>
+    <string name="spam_token_set">Set (ends with …%s)</string>
+    <string name="spam_skip_contacts">Never check messages from my contacts</string>
+    <string name="spam_skip_codes">Never check messages that look like login codes</string>
+    <string name="spam_test_connection">Test the connection</string>
+    <string name="spam_testing">Testing…</string>
+    <string name="spam_test_ok">Works. A test message got: spam = %1$s</string>
+    <string name="spam_test_failed">Connection failed: %s</string>
+    <string name="spam_filter_not_configured">Set the API URL and the token first.</string>
+    <string name="spam_url_must_be_https">The URL must start with https://</string>
+    <string name="spam_allowed_senders">Senders marked “Not spam”: %d</string>
+    <string name="spam_clear_allowed_senders">Clear the “Not spam” list</string>
+    <string name="spam_clear_allowed_senders_confirmation">Check these senders with the API again?</string>
+    <string name="spam_no_messages">No spam messages</string>
+    <string name="not_spam">Not spam</string>
+    <string name="report_as_spam">Report as spam</string>
+    <string name="report_as_spam_confirmation">Move this conversation to the spam folder and report the sender to the spam server? Messages you sent in it are deleted.</string>
+    <string name="moved_to_spam">Moved to the spam folder</string>
+    <string name="moved_to_inbox">Moved to the inbox</string>
+    <string name="delete_all_spam">Delete all spam</string>
+    <string name="delete_all_spam_confirmation">Delete all messages in the spam folder? This cannot be undone.</string>
+    <string name="spam_feedback_failed">The spam server was not told: %s</string>
+    <string name="spam_reason_sender">Blocked sender</string>
+    <string name="spam_reason_phrase">Spam phrase</string>
+    <string name="spam_reason_ai">AI: %d%%</string>
+    <string name="spam_reason_report">Reported by you</string>
 </resources>

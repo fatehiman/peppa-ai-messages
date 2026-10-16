@@ -4,6 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="AppCompatResource,AlwaysShowAction">
     <item
+        android:id="@+id/show_spam"
+        android:showAsAction="never"
+        android:title="@string/show_spam_folder"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/show_recycle_bin"
         android:showAsAction="never"
         android:title="@string/show_the_recycle_bin"

@@ -112,7 +112,6 @@
     <string name="faq_3_title">Uygulama planlanmış mesajları destekliyor mu?</string>
     <string name="faq_3_text">Evet, gönder düğmesine uzun bastıktan sonra istediğiniz tarih ve saati seçerek iletileri gelecekte gönderilmek üzere planlayabilirsiniz.</string>
     <string name="enable_custom_notifications">Özel bildirimleri etkinleştir</string>
-    <string name="app_launcher_name">Mesajlar</string>
     <string name="keywords">Anahtar sözcükler</string>
     <string name="import_blocked_keywords">Engellenen anahtar sözcükleri içeri aktar</string>
     <string name="export_blocked_keywords">Engellenen anahtar sözcükleri dışarı aktar</string>

@@ -25,7 +25,7 @@ fun hasSigningVars(): Boolean {
 
 base {
     val versionCode = project.property("VERSION_CODE").toString().toInt()
-    archivesName = "messages-$versionCode"
+    archivesName = "sms-man-$versionCode"
 }
 
 android {
@@ -115,7 +115,8 @@ android {
         )
     }
 
-    namespace = project.property("APP_ID").toString()
+    // the Kotlin package stays org.fossify.messages; only the installed app id (APP_ID) changes
+    namespace = "org.fossify.messages"
 
     lint {
         checkReleaseBuilds = false

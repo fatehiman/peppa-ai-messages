@@ -90,7 +90,6 @@
     <string name="restore_all_messages">Obnovi vsa sporočila</string>
     <string name="empty_recycle_bin_messages_confirmation">Ali ste prepričani, da želite izprazniti koš? Sporočila bodo trajno izgubljena.</string>
     <string name="skip_the_recycle_bin_messages">Preskoči koš, neposredno izbriši sporočila</string>
-    <string name="app_launcher_name">Sporočila</string>
     <string name="update_message">Posodobi sporočilo</string>
     <string name="message_details">Podrobnosti sporočila</string>
     <string name="message_details_sender">Pošiljatelj</string>

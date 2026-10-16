@@ -84,7 +84,6 @@
     <string name="no_archived_conversations">Tidak ada arsip percakapan yang ditemukan</string>
     <string name="archive_emptied_successfully">Arsip telah berhasil dikosongkan</string>
     <string name="empty_archive_confirmation">Anda yakin ingin mengosongkan arsip? Semua percakapan yang diarsipkan akan hilang secara permanen.</string>
-    <string name="app_launcher_name">Pesan</string>
     <string name="pin_conversation">Sematkan ke atas</string>
     <string name="message_details_sender">Pengirim</string>
     <string name="update_message">Perbarui pesan</string>

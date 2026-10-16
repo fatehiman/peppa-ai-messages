@@ -86,7 +86,6 @@
     <string name="skip_the_recycle_bin_messages">Ikke bruk papirkurven, slett meldinger med én gang</string>
     <string name="archive_confirmation">Er du sikker på at du vil arkivere %s?</string>
     <string name="restore_confirmation">Er du sikker på at du vil gjenopprette %s?</string>
-    <string name="app_launcher_name">Meldinger</string>
     <string name="show_archived_conversations">Vis arkiverte samtaler</string>
     <string name="archived_conversations">Arkiver</string>
     <string name="archive">Arkiv</string>

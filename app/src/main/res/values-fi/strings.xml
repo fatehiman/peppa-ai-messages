@@ -111,7 +111,6 @@
     <string name="faq_2_text">Operaattorit rajoittavat MMS-kokoa, voit yrittää asettaa pienemmän rajan sovelluksen asetuksissa.</string>
     <string name="faq_3_title">Tukeeko sovellus ajoitettua viestien lähetystä\?</string>
     <string name="faq_3_text">Kyllä tukee ja voit ajoittaa viestin lähetyksen painamalla lähetyspainiketta pitkään ja valitsemalla halutun päivän ja kellonajan.</string>
-    <string name="app_launcher_name">Viestit</string>
     <string name="enable_custom_notifications">Käytä mukautettuja ilmoituksia</string>
     <string name="keywords">Avainsanat</string>
     <string name="export_blocked_keywords">Vie estetyt avainsanat</string>

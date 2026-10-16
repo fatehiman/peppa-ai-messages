@@ -68,5 +68,4 @@
     <string name="faq_2_title">Іншы бок не атрымлівае мае MMS, ці можна штосьці з гэтым зрабіць\?</string>
     <string name="faq_2_text">Памер MMS абмежаваны аператарамі сувязі, магчыма паспрабаваць зменьшыць ліміт у наладах прыкладання.</string>
     <string name="restore_confirmation">Вы ўпэўнены, што хаціце аднавіць %s?</string>
-    <string name="app_launcher_name">Паведамленні</string>
 </resources>

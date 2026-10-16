@@ -12,6 +12,7 @@ import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.models.PhoneNumber
 import org.fossify.commons.models.SimpleContact
+import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.getConversations
 import org.fossify.messages.extensions.getNameFromAddress
 import org.fossify.messages.extensions.getNotificationBitmap
@@ -21,11 +22,14 @@ import org.fossify.messages.extensions.insertOrUpdateConversation
 import org.fossify.messages.extensions.messagesDB
 import org.fossify.messages.extensions.shouldUnarchive
 import org.fossify.messages.extensions.showReceivedMessageNotification
+import org.fossify.messages.extensions.spamMessagesDB
 import org.fossify.messages.extensions.updateConversationArchivedStatus
 import org.fossify.messages.helpers.ReceiverUtils.isMessageFilteredOut
+import org.fossify.messages.helpers.SpamFilter
 import org.fossify.messages.helpers.refreshConversations
 import org.fossify.messages.helpers.refreshMessages
 import org.fossify.messages.models.Message
+import org.fossify.messages.models.SpamMessage
 
 class SmsReceiver : BroadcastReceiver() {
 
@@ -55,8 +59,13 @@ class SmsReceiver : BroadcastReceiver() {
                 }
 
                 val date = System.currentTimeMillis()
-                val threadId = appContext.getThreadId(address)
                 val subscriptionId = intent.getIntExtra("subscription", -1)
+
+                // sms-man: spam goes only to the app's own spam folder: no system DB row, no thread, no notification.
+                // This runs before getThreadId(), which would create an empty thread in the system DB.
+                if (isSpam(appContext, address, body, date, subscriptionId)) return@ensureBackgroundThread
+
+                val threadId = appContext.getThreadId(address)
 
                 handleMessageSync(
                     context = appContext,
@@ -71,6 +80,34 @@ class SmsReceiver : BroadcastReceiver() {
             } finally {
                 pending.finish()
             }
+        }
+    }
+
+    /** Ask the spam API; if it says spam, save the SMS in the spam folder and return true. Fail-open. */
+    private fun isSpam(context: Context, address: String, body: String, date: Long, subscriptionId: Int): Boolean {
+        if (!context.config.isSpamFilterConfigured) return false
+        val isContact = context.config.spamSkipContacts &&
+            context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true).use {
+                SimpleContactsHelper(context).existsSync(address, it) is ContactLookupResult.Found
+            }
+        if (!SpamFilter.shouldCheck(context, address, body, isContact)) return false
+
+        val result = SpamFilter.check(context, address, body)
+        if (result !is SpamFilter.Result.Spam) return false
+        return try {
+            context.spamMessagesDB.insert(
+                SpamMessage(
+                    address = address,
+                    body = body,
+                    date = date,
+                    subscriptionId = subscriptionId,
+                    reason = result.reason,
+                    percent = result.percent
+                )
+            )
+            true
+        } catch (_: Exception) {
+            false
         }
     }
 

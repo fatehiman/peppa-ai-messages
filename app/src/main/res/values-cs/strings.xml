@@ -115,7 +115,6 @@
     <string name="update_message">Aktualizovat zprávu</string>
     <string name="message_details">Detaily zprávy</string>
     <string name="enable_custom_notifications">Povolit vlastní oznámení</string>
-    <string name="app_launcher_name">Zprávy</string>
     <string name="keywords">Klíčová slova</string>
     <string name="export_blocked_keywords">Exportovat zablokovaná klíčová slova</string>
     <string name="import_blocked_keywords">Importovat zablokovaná klíčová slova</string>

@@ -71,7 +71,6 @@
     <string name="me">मैं</string>
     <string name="sender_only">केवल प्रेषक</string>
     <string name="unable_to_save_message">संदेश को टेलीफ़ोनी डेटाबेस में सहेजने में असमर्थ</string>
-    <string name="app_launcher_name">संदेश</string>
     <string name="duplicate_item_warning">डुप्लीकेट आइटम शामिल नहीं था</string>
     <string name="members">सदस्यों</string>
     <string name="conversation_details">बातचीत का विवरण</string>

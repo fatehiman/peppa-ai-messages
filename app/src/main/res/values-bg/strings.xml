@@ -108,7 +108,6 @@
     <string name="faq_2_text">Размерът на MMS е ограничен от оператора, може да се опитате да зададете по-малко ограничение в настройките на приложението.</string>
     <string name="faq_3_title">Има ли отложено изпращане на съобщения?</string>
     <string name="faq_3_text">Да, можете да планирате изпращане на съобщения в бъдеще, като натиснете продължително бутона „Изпращане“ и изберете желаната дата и час.</string>
-    <string name="app_launcher_name">Съобщения</string>
     <string name="me">Аз</string>
     <string name="enable_custom_notifications">Известия по избор</string>
     <string name="update_message">Промяна на съобщението</string>

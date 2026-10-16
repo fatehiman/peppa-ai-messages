@@ -40,7 +40,6 @@
     <string name="invalid_short_code">Nevar atbildēt uz īsajiem kodiem kā šis</string>
     <string name="no_archived_conversations">Netika atrasta neviena arhivēta saruna</string>
     <string name="restore">Atjaunot</string>
-    <string name="app_launcher_name">Ziņojumi</string>
     <string name="no_conversations_found">Netika atrasta neviena saglabāta saruna</string>
     <string name="show_character_counter">Rādīt rakstzīmju skaitītāju ziņojumu rakstīšanas laikā</string>
     <string name="no_reply_support">Sūtītājs neatbalsta atbildes</string>

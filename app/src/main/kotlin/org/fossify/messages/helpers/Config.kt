@@ -151,4 +151,35 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(KEEP_CONVERSATIONS_ARCHIVED, false)
         set(keepConversationsArchived) = prefs.edit()
             .putBoolean(KEEP_CONVERSATIONS_ARCHIVED, keepConversationsArchived).apply()
+
+    // sms-man: AI spam filter
+    var spamFilterEnabled: Boolean
+        get() = prefs.getBoolean(SPAM_FILTER_ENABLED, true)
+        set(spamFilterEnabled) = prefs.edit().putBoolean(SPAM_FILTER_ENABLED, spamFilterEnabled).apply()
+
+    var spamApiUrl: String
+        get() = prefs.getString(SPAM_API_URL, "")!!
+        set(spamApiUrl) = prefs.edit().putString(SPAM_API_URL, spamApiUrl.trim()).apply()
+
+    var spamApiToken: String
+        get() = prefs.getString(SPAM_API_TOKEN, "")!!
+        set(spamApiToken) = prefs.edit().putString(SPAM_API_TOKEN, spamApiToken.trim()).apply()
+
+    /** Never send messages from saved contacts to the API; they are never spam. */
+    var spamSkipContacts: Boolean
+        get() = prefs.getBoolean(SPAM_SKIP_CONTACTS, true)
+        set(spamSkipContacts) = prefs.edit().putBoolean(SPAM_SKIP_CONTACTS, spamSkipContacts).apply()
+
+    /** Never send messages that look like a login / verification code to the API. */
+    var spamSkipCodes: Boolean
+        get() = prefs.getBoolean(SPAM_SKIP_CODES, true)
+        set(spamSkipCodes) = prefs.edit().putBoolean(SPAM_SKIP_CODES, spamSkipCodes).apply()
+
+    /** Senders the user marked "Not spam": they are never checked again. Stored normalized. */
+    var spamAllowedSenders: Set<String>
+        get() = prefs.getStringSet(SPAM_ALLOWED_SENDERS, HashSet<String>())!!
+        set(spamAllowedSenders) = prefs.edit().putStringSet(SPAM_ALLOWED_SENDERS, spamAllowedSenders).apply()
+
+    val isSpamFilterConfigured: Boolean
+        get() = spamFilterEnabled && spamApiUrl.isNotEmpty() && spamApiToken.isNotEmpty()
 }

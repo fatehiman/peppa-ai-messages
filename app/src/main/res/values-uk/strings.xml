@@ -117,7 +117,6 @@
     <string name="faq_2_text">Розмір MMS обмежений операторами, ви можете спробувати зменшити ліміт у налаштуваннях програми.</string>
     <string name="faq_3_title">Чи підтримує застосунок заплановані повідомлення\?</string>
     <string name="faq_3_text">Так, ви можете запланувати надсилання повідомлень у майбутньому, довго натискаючи кнопку «Надіслати» та вибираючи потрібну дату й час.</string>
-    <string name="app_launcher_name">Повідомлення</string>
     <string name="enable_custom_notifications">Ввімкнути власні сповіщення</string>
     <string name="keywords">Ключові слова</string>
     <string name="export_blocked_keywords">Експорт заблокованих ключових слів</string>

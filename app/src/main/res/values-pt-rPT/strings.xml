@@ -33,7 +33,6 @@
     <string name="update_message">Atualizar mensagem</string>
     <string name="export_sms">Exportar SMS</string>
     <string name="send_on_enter">Enviar mensagem ao premir Enter</string>
-    <string name="app_launcher_name">Mensagens</string>
     <string name="message_not_sent_short">Mensagem não enviada</string>
     <string name="message_not_sent_touch_retry">Não enviada. Toque para tentar novamente.</string>
     <string name="message_sending_error">A mensagem destinada a \'%s\' não foi enviada</string>

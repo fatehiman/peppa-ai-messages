@@ -68,7 +68,6 @@
     <string name="conversation_name">Numele conversației</string>
     <string name="conversation_details">Detaliile conversației</string>
     <string name="rename_conversation">Redenumire conversație</string>
-    <string name="app_launcher_name">Mesaje</string>
     <string name="rename_conversation_warning">Numai tu poți vedea numele acestei conversații</string>
     <string name="scheduled_message">Mesaj programat</string>
     <string name="schedule_message">Programează mesajul</string>

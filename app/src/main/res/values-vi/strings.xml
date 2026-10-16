@@ -109,7 +109,6 @@
     <string name="faq_3_title">Ứng dụng có hỗ trợ lên lịch gửi tin nhắn không?</string>
     <string name="faq_3_text">Có, bạn có thể lên lịch gửi tin nhắn trong tương lai bằng cách nhấn giữ nút Gửi rồi chọn ngày giờ mong muốn.</string>
     <string name="enable_custom_notifications">Bật thông báo tùy chỉnh</string>
-    <string name="app_launcher_name">Tin nhắn</string>
     <string name="keep_conversations_archived">Lưu trữ các cuộc trò chuyện</string>
     <string name="keywords">Các từ khóa</string>
     <string name="export_blocked_keywords">Xuất từ khóa bị chặn</string>

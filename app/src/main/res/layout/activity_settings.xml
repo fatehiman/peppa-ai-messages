@@ -359,6 +359,154 @@
                 layout="@layout/divider" />
 
             <TextView
+                android:id="@+id/settings_spam_label"
+                style="@style/SettingsSectionLabelStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/spam_filter" />
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_filter_enabled_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_spam_filter_enabled"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_filter_enabled" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_api_url_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_api_url_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_api_url" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_api_url"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_spam_api_url_label"
+                    tools:text="@string/spam_not_set" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_api_token_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_api_token_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_api_token" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_api_token"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_spam_api_token_label"
+                    tools:text="@string/spam_not_set" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_skip_contacts_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_spam_skip_contacts"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_skip_contacts" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_skip_codes_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_spam_skip_codes"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_skip_codes" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_test_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_test_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_test_connection" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_test"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_spam_test_label"
+                    tools:text="@string/spam_not_set" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_spam_allowed_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_allowed_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_clear_allowed_senders" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_allowed"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_spam_allowed_label"
+                    tools:text="@string/spam_not_set" />
+
+            </RelativeLayout>
+
+            <include
+                android:id="@+id/settings_spam_divider"
+                layout="@layout/divider" />
+
+            <TextView
                 android:id="@+id/settings_archived_messages_label"
                 style="@style/SettingsSectionLabelStyle"
                 android:layout_width="match_parent"

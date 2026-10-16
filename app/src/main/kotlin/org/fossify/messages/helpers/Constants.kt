@@ -49,6 +49,14 @@ const val CUSTOM_NOTIFICATIONS = "custom_notifications"
 const val IS_LAUNCHED_FROM_SHORTCUT = "is_launched_from_shortcut"
 const val KEEP_CONVERSATIONS_ARCHIVED = "keep_conversations_archived"
 
+// sms-man: AI spam filter
+const val SPAM_FILTER_ENABLED = "spam_filter_enabled"
+const val SPAM_API_URL = "spam_api_url"
+const val SPAM_API_TOKEN = "spam_api_token"
+const val SPAM_SKIP_CONTACTS = "spam_skip_contacts"
+const val SPAM_SKIP_CODES = "spam_skip_codes"
+const val SPAM_ALLOWED_SENDERS = "spam_allowed_senders"
+
 private const val PATH = "org.fossify.org.fossify.messages.action."
 const val MARK_AS_READ = PATH + "mark_as_read"
 const val REPLY = PATH + "reply"

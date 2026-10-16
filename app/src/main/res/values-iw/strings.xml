@@ -65,7 +65,6 @@
     <string name="faq_1_text">למרבה הצער, זה נחוץ לשליחת קבצי MMS מצורפים. אי היכולת לשלוח MMS תהיה חיסרון עצום בהשוואה לאפליקציות אחרות, אז החלטנו ללכת בדרך זו. עם זאת, כמו בדרך כלל, אין מודעות, מעקב או ניתוח כלשהם, האינטרנט משמש רק לשליחת MMS.</string>
     <string name="faq_2_title">הודעות ה־MMS לא מתקבלות אצל הצד השני, האם יש משהו שאפשר לעשות לגבי זה?</string>
     <string name="faq_2_text">גודל ה-MMS מוגבל על ידי הספקים, אתה יכול לנסות להגדיר מגבלה קטנה יותר בהגדרות האפליקציה.</string>
-    <string name="app_launcher_name">הודעות</string>
     <string name="members">חברים</string>
     <string name="conversation_name">שם שיחה</string>
     <string name="conversation_details">פרטי שיחה</string>

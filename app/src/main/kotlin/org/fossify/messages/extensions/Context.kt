@@ -65,6 +65,7 @@ import org.fossify.messages.interfaces.ConversationsDao
 import org.fossify.messages.interfaces.DraftsDao
 import org.fossify.messages.interfaces.MessageAttachmentsDao
 import org.fossify.messages.interfaces.MessagesDao
+import org.fossify.messages.interfaces.SpamMessagesDao
 import org.fossify.messages.messaging.MessagingUtils
 import org.fossify.messages.messaging.MessagingUtils.Companion.ADDRESS_SEPARATOR
 import org.fossify.messages.messaging.SmsSender
@@ -96,6 +97,9 @@ val Context.messageAttachmentsDB: MessageAttachmentsDao
 
 val Context.messagesDB: MessagesDao
     get() = getMessagesDB().MessagesDao()
+
+val Context.spamMessagesDB: SpamMessagesDao
+    get() = getMessagesDB().SpamMessagesDao()
 
 val Context.draftsDB: DraftsDao
     get() = getMessagesDB().DraftsDao()

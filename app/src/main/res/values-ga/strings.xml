@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sending">Á sheoladh…</string>
-    <string name="app_launcher_name">Teachtaireachtaí</string>
     <string name="compress_error">Ní féidir an íomhá a chomhbhrú go méid roghnaithe</string>
     <string name="message_sending_error">Níl do theachtaireacht chuig \'%s\' seolta</string>
     <string name="add_person">Cuir Duine leis</string>

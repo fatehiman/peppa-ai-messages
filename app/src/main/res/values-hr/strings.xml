@@ -113,7 +113,6 @@
     <string name="faq_2_text">Veličinu MMS-a ograničavaju operateri. Možeš pokušati smanjiti ograničenje u postavkama aplikacije.</string>
     <string name="faq_3_title">Podržava li aplikacija zakazane poruke\?</string>
     <string name="faq_3_text">Da, možeš zakazati slanje poruka u budućnosti dugim pritiskom gumba „Pošalji” i odabrati željeni datum i vrijeme.</string>
-    <string name="app_launcher_name">Poruke</string>
     <string name="couldnt_download_mms">Nije bilo moguće preuzeti MMS</string>
     <string name="enable_custom_notifications">Omogući prilagođene obavijesti</string>
     <string name="keywords">Ključne riječi</string>

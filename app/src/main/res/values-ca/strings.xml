@@ -112,7 +112,6 @@
     <string name="faq_3_text">Sí, podeu programar missatges per a enviar-los en el futur prement prolongadament el botó Envia i escollint la data i l\'hora desitjades.</string>
     <string name="faq_2_title">L\'altre extrem no ha rebut el meu MMS, hi puc fer alguna cosa\?</string>
     <string name="enable_custom_notifications">Activa les notificacions personalitzades</string>
-    <string name="app_launcher_name">Missatges</string>
     <string name="update_message">Actualitza el missatge</string>
     <string name="message_details">Detalls del missatge</string>
     <string name="me">Jo</string>

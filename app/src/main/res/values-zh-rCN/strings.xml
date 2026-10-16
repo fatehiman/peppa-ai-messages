@@ -109,7 +109,6 @@
     <string name="faq_3_title">本应用支持定时信息吗？</string>
     <string name="faq_3_text">是的，您可以长按发送按钮并选择所需的日期和时间来安排将来发送的信息。</string>
     <string name="enable_custom_notifications">启用自定义通知</string>
-    <string name="app_launcher_name">信息</string>
     <string name="import_blocked_keywords">导入屏蔽关键词</string>
     <string name="keywords">关键词</string>
     <string name="export_blocked_keywords">导出屏蔽关键词</string>

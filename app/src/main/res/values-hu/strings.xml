@@ -101,7 +101,6 @@
     <string name="empty_archive">Törölje az összes archivált beszélgetést</string>
     <string name="empty_recycle_bin_messages_confirmation">Biztosan ki szeretné üríteni a Lomtárat? Az üzenetek véglegesen elvesznek.</string>
     <string name="skip_the_recycle_bin_messages">Lomtár kihagyása, üzenetek közvetlen törlése</string>
-    <string name="app_launcher_name">Üzenetek</string>
     <string name="message_details">Üzenet részletei</string>
     <string name="message_details_sender">Küldő</string>
     <string name="message_details_receiver">Címzett</string>
