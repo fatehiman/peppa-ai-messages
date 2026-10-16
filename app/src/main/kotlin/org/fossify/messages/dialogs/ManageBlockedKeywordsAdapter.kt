@@ -13,9 +13,11 @@ import org.fossify.commons.views.MyRecyclerView
 import org.fossify.messages.R
 import org.fossify.messages.databinding.ItemManageBlockedKeywordBinding
 import org.fossify.messages.extensions.config
+import org.fossify.messages.helpers.KeywordList
 
 class ManageBlockedKeywordsAdapter(
-    activity: BaseSimpleActivity, var blockedKeywords: ArrayList<String>, val listener: RefreshRecyclerViewListener?,
+    activity: BaseSimpleActivity, var blockedKeywords: ArrayList<String>, val list: KeywordList,
+    val listener: RefreshRecyclerViewListener?,
     recyclerView: MyRecyclerView, itemClick: (Any) -> Unit
 ) : MyRecyclerViewAdapter(activity, recyclerView, itemClick) {
     init {
@@ -136,7 +138,7 @@ class ManageBlockedKeywordsAdapter(
 
         getSelectedItems().forEach {
             deleteBlockedKeywords.add(it)
-            activity.config.removeBlockedKeyword(it)
+            activity.config.removeFromKeywordList(list, it)
         }
 
         blockedKeywords.removeAll(deleteBlockedKeywords)

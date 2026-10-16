@@ -2,12 +2,13 @@ package org.fossify.messages.extensions
 
 import android.content.Context
 import android.provider.Telephony.Sms
+import org.fossify.messages.helpers.KeywordList
 import org.fossify.messages.helpers.SpamFilter
 import org.fossify.messages.models.SpamMessage
 
 /**
  * sms-man: "Not spam". Moves the message into the system SMS database (normal inbox, marked read)
- * and adds the sender to the local allow list, so it is never checked again.
+ * and adds the sender to "allowed numbers", so it is never checked again.
  */
 fun Context.restoreSpamMessage(message: SpamMessage) {
     val threadId = getThreadId(message.address)
@@ -27,7 +28,9 @@ fun Context.restoreSpamMessage(message: SpamMessage) {
         runCatching { insertOrUpdateConversation(conv) }
     }
     spamMessagesDB.delete(message.id)
-    config.spamAllowedSenders += SpamFilter.normalizeSender(message.address)
+    if (!SpamFilter.isAllowedNumber(this, message.address)) {
+        config.addToKeywordList(KeywordList.ALLOWED_NUMBERS, message.address)
+    }
 }
 
 /**
@@ -58,6 +61,9 @@ fun Context.moveConversationToSpam(threadId: Long): Set<String> {
     }
 
     deleteConversation(threadId)
-    config.spamAllowedSenders -= senders.map { SpamFilter.normalizeSender(it) }.toSet()
+    val reported = senders.map { SpamFilter.normalizeSender(it) }.toSet()
+    config.allowedNumbers.filter { SpamFilter.normalizeSender(it) in reported }.forEach {
+        config.removeFromKeywordList(KeywordList.ALLOWED_NUMBERS, it)
+    }
     return senders
 }

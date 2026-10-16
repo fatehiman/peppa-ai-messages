@@ -206,9 +206,6 @@
     <string name="spam_test_failed">Connection failed: %s</string>
     <string name="spam_filter_not_configured">Set the API URL and the token first.</string>
     <string name="spam_url_must_be_https">The URL must start with https://</string>
-    <string name="spam_allowed_senders">Senders marked “Not spam”: %d</string>
-    <string name="spam_clear_allowed_senders">Clear the “Not spam” list</string>
-    <string name="spam_clear_allowed_senders_confirmation">Check these senders with the API again?</string>
     <string name="spam_no_messages">No spam messages</string>
     <string name="not_spam">Not spam</string>
     <string name="report_as_spam">Report as spam</string>
@@ -218,8 +215,22 @@
     <string name="delete_all_spam">Delete all spam</string>
     <string name="delete_all_spam_confirmation">Delete all messages in the spam folder? This cannot be undone.</string>
     <string name="spam_feedback_failed">The spam server was not told: %s</string>
-    <string name="spam_reason_sender">Blocked sender</string>
-    <string name="spam_reason_phrase">Spam phrase</string>
     <string name="spam_reason_ai">AI: %d%%</string>
     <string name="spam_reason_report">Reported by you</string>
+    <string name="spam_reason_sender">Blocked sender (server)</string>
+    <string name="spam_reason_phrase">Spam phrase (server)</string>
+    <string name="spam_reason_blocked_number">Blocked number</string>
+    <string name="spam_reason_blocked_keyword">Blocked keyword: %s</string>
+    <string name="spam_reason_unknown_number">Unknown number (blocked)</string>
+    <string name="manage_allowed_numbers">Manage allowed numbers</string>
+    <string name="manage_allowed_keywords">Manage allowed keywords</string>
+    <string name="allowed_numbers">Allowed numbers</string>
+    <string name="allowed_keywords">Allowed keywords</string>
+    <string name="add_an_allowed_number">Add an allowed number</string>
+    <string name="add_an_allowed_keyword">Add an allowed keyword</string>
+    <string name="number_or_sender_name">Number or sender name</string>
+    <string name="no_allowed_numbers">No allowed numbers. Messages from these numbers always go to the inbox and are never sent to the spam API. “Not spam” adds the sender here.</string>
+    <string name="no_allowed_keywords">No allowed keywords. Messages that contain one of these words always go to the inbox and are never sent to the spam API.</string>
+    <string name="import_from_file">Import from a file</string>
+    <string name="export_to_file">Export to a file</string>
 </resources>

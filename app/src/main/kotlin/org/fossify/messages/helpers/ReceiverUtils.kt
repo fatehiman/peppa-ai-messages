@@ -5,13 +5,10 @@ import org.fossify.messages.extensions.config
 
 object ReceiverUtils {
 
-    fun isMessageFilteredOut(context: Context, body: String): Boolean {
-        for (blockedKeyword in context.config.blockedKeywords) {
-            if (body.contains(blockedKeyword, ignoreCase = true)) {
-                return true
-            }
-        }
+    fun isMessageFilteredOut(context: Context, body: String) = findBlockedKeyword(context, body) != null
 
-        return false
+    /** sms-man: the first blocked keyword that [body] contains, or null. */
+    fun findBlockedKeyword(context: Context, body: String): String? {
+        return context.config.blockedKeywords.firstOrNull { body.contains(it, ignoreCase = true) }
     }
 }

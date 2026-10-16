@@ -1,6 +1,11 @@
 package org.fossify.messages.helpers
 
 import android.content.Context
+import org.fossify.commons.extensions.baseConfig
+import org.fossify.commons.extensions.getMyContactsCursor
+import org.fossify.commons.extensions.isNumberBlocked
+import org.fossify.commons.helpers.ContactLookupResult
+import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.messages.extensions.config
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -26,7 +31,14 @@ object SpamFilter {
     // The SMS receiver must finish in about 10 s, so it never waits longer than this.
     private const val CHECK_DEADLINE_MS = 8_000L
 
+    // Phone numbers are compared by their last 10 digits (shorter ones are short codes: exact match only).
+    private const val PHONE_DIGITS = 10
+
+    // Reasons saved with a spam message. The API adds its own: sender, phrase, ai.
     const val REASON_REPORT = "report"
+    const val REASON_BLOCKED_NUMBER = "blocked_number"
+    const val REASON_BLOCKED_KEYWORD_PREFIX = "keyword:"
+    const val REASON_UNKNOWN_NUMBER = "unknown_number"
 
     private val executor = Executors.newCachedThreadPool()
 
@@ -44,19 +56,71 @@ object SpamFilter {
     )
     private val CODE_DIGITS = Regex("[0-9۰-۹٠-٩]{4,8}")
 
-    fun normalizeSender(address: String) = address.filterNot { it == ' ' || it == '-' }.removePrefix("+")
+    fun normalizeSender(address: String) =
+        address.filterNot { it == ' ' || it == '-' }.removePrefix("+").lowercase()
 
     fun looksLikeCode(body: String) = CODE_WORDS.containsMatchIn(body) && CODE_DIGITS.containsMatchIn(body)
 
-    /** Should this incoming SMS be sent to the API? [isContact] = the sender is a saved contact. */
-    fun shouldCheck(context: Context, address: String, body: String, isContact: Boolean): Boolean {
+    /**
+     * Is [address] in the "allowed numbers" list? Exact match (after [normalizeSender]), or for phone
+     * numbers the same last 10 digits, so 09121234567 matches +989121234567. Short codes: exact only.
+     */
+    fun isAllowedNumber(context: Context, address: String): Boolean {
+        val sender = normalizeSender(address)
+        return context.config.allowedNumbers.any { entry ->
+            val allowed = normalizeSender(entry)
+            allowed == sender || (allowed.length >= PHONE_DIGITS && sender.length >= PHONE_DIGITS &&
+                allowed.all { it.isDigit() } && sender.all { it.isDigit() } &&
+                allowed.takeLast(PHONE_DIGITS) == sender.takeLast(PHONE_DIGITS))
+        }
+    }
+
+    sealed class Decision {
+        object Inbox : Decision()
+        data class Spam(val reason: String, val percent: Int?) : Decision()
+    }
+
+    /**
+     * Where does a new incoming SMS go? Blocking (it may call the API); call it from a background thread.
+     * The order of the rules matters:
+     *  1. blocked number (Fossify list)      -> spam folder
+     *  2. blocked keyword                    -> spam folder
+     *  3. "block unknown numbers" + unknown  -> spam folder
+     *  4. contact (setting, on by default)   -> inbox
+     *  5. allowed number / allowed keyword   -> inbox
+     *  6. looks like a login code (setting)  -> inbox
+     *  7. spam filter off or not set up      -> inbox
+     *  8. the API: spam -> spam folder; not spam, error, timeout (8 s), no internet -> inbox
+     */
+    fun decide(context: Context, address: String, body: String): Decision {
         val config = context.config
-        return when {
-            !config.isSpamFilterConfigured -> false
-            config.spamSkipContacts && isContact -> false
-            config.spamSkipCodes && looksLikeCode(body) -> false
-            normalizeSender(address) in config.spamAllowedSenders -> false
-            else -> true
+        val contactResult by lazy {
+            context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true).use {
+                SimpleContactsHelper(context).existsSync(address, it)
+            }
+        }
+
+        if (context.isNumberBlocked(address)) return Decision.Spam(REASON_BLOCKED_NUMBER, null)
+        ReceiverUtils.findBlockedKeyword(context, body)?.let {
+            return Decision.Spam(REASON_BLOCKED_KEYWORD_PREFIX + it, null)
+        }
+        if (context.baseConfig.blockUnknownNumbers && contactResult == ContactLookupResult.NotFound) {
+            return Decision.Spam(REASON_UNKNOWN_NUMBER, null)
+        }
+
+        val isAllowed = when {
+            config.spamSkipContacts && contactResult is ContactLookupResult.Found -> true
+            isAllowedNumber(context, address) -> true
+            config.allowedKeywords.any { it.isNotEmpty() && body.contains(it, ignoreCase = true) } -> true
+            config.spamSkipCodes && looksLikeCode(body) -> true
+            !config.isSpamFilterConfigured -> true
+            else -> false
+        }
+        if (isAllowed) return Decision.Inbox
+
+        return when (val result = check(context, address, body)) {
+            is Result.Spam -> Decision.Spam(result.reason, result.percent)
+            else -> Decision.Inbox
         }
     }
 

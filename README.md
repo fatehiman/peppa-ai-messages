@@ -17,23 +17,35 @@ export / import of all messages (JSON, and the XML of "SMS Backup & Restore").
 
 | Where | What |
 | --- | --- |
-| Settings → **Spam filter (AI)** | On/off, **API endpoint URL**, **API token**, "Never check messages from my contacts" (on), "Never check messages that look like login codes" (on), **Test the connection**, clear the "Not spam" list |
-| Main menu → **Show the spam folder** | List of caught messages (sender, date, SIM 1/2, reason, e.g. `AI: 92%`). Tap one: read it, **Not spam** (moves it to the inbox and tells the server) or **Delete**. Menu: **Delete all spam** |
+| Settings → **Spam filter (AI)** | On/off, **API endpoint URL**, **API token**, "Never check messages from my contacts" (on), "Never check messages that look like login codes" (on), **Test the connection** |
+| Settings → **Manage allowed numbers** | Numbers or sender names that always go to the inbox and are never sent to the API. `0912…` also matches `+98912…`. "Not spam" adds the sender here |
+| Settings → **Manage allowed keywords** | Words: a message that contains one always goes to the inbox, never to the API (for example `کد تایید`, a bank name) |
+| Main menu → **Show the spam folder** | List of caught messages (sender, date, SIM 1/2, reason, e.g. `AI: 92%`, `Blocked keyword: …`). Tap one: read it, **Not spam** (moves it to the inbox, adds the sender to allowed numbers and tells the server) or **Delete**. Menu: **Delete all spam** |
 | Conversation menu → **Report as spam** | Moves the received messages of the conversation into the spam folder, deletes the conversation, and tells the server the sender is a spammer |
 
-### How a new SMS is handled
+The spam folder is separate from Fossify's **Archived conversations** (that folder is only for
+conversations you archive by hand).
 
-1. The normal Fossify filters run first (blocked numbers, blocked keywords, block unknown numbers).
-2. The spam check is **skipped** (the SMS goes to the inbox) when:
-   the filter is off or the URL/token is empty, the sender is a contact, the text looks like a
-   login / verification code (`OTP`, `رمز`, `کد تایید` … plus 4–8 digits; `کد تخفیف` is *not* a code),
-   or you marked this sender "Not spam" before.
-3. Otherwise the app calls the API and waits **at most 8 seconds**.
-4. `spam: true` → saved in the Spam folder only. Anything else (not spam, error, timeout, no
-   internet) → normal inbox with a notification. **A message is never lost because of the API.**
+### How a new SMS is handled (in this order)
 
-Code: [SpamFilter.kt](app/src/main/kotlin/org/fossify/messages/helpers/SpamFilter.kt),
-[SmsReceiver.kt](app/src/main/kotlin/org/fossify/messages/receivers/SmsReceiver.kt) (`isSpam`),
+| # | Rule | Result |
+| --- | --- | --- |
+| – | Sender is in **Android's system block list** (Settings → Manage blocked numbers) | Android itself deletes the SMS before any app gets it (calls are blocked too). Nothing is saved. |
+| 1 | Sender is a blocked number that reaches the app (for example a pattern) | Spam folder, no API call |
+| 2 | Text contains a **blocked keyword** | Spam folder, no API call |
+| 3 | "Block messages from unknown numbers" is on and the sender is not a contact | Spam folder, no API call |
+| 4 | Sender is a **contact** (setting, on by default) | Inbox, no API call |
+| 5 | Sender is an **allowed number**, or the text has an **allowed keyword** | Inbox, no API call |
+| 6 | Text looks like a login code (`OTP`, `رمز`, `کد تایید` … plus 4–8 digits; setting, on by default) | Inbox, no API call |
+| 7 | Spam filter off, or no URL / token | Inbox |
+| 8 | **API**: `spam: true` | Spam folder |
+| 9 | API says not spam, error, no internet, or no answer in **8 seconds** | Inbox |
+
+Spam folder = no notification, and the SMS is never written to the phone's SMS database.
+**A message is never lost because of the API.**
+
+Code: [SpamFilter.kt](app/src/main/kotlin/org/fossify/messages/helpers/SpamFilter.kt) (`decide` = the rules above),
+[SmsReceiver.kt](app/src/main/kotlin/org/fossify/messages/receivers/SmsReceiver.kt), [KeywordList.kt](app/src/main/kotlin/org/fossify/messages/helpers/KeywordList.kt) (blocked / allowed lists),
 [Spam.kt](app/src/main/kotlin/org/fossify/messages/extensions/Spam.kt) (move to / from the spam folder),
 [SpamMessagesActivity.kt](app/src/main/kotlin/org/fossify/messages/activities/SpamMessagesActivity.kt),
 Room table `spam_messages` (database version 12, `MIGRATION_11_12` in

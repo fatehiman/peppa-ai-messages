@@ -43,6 +43,8 @@ import org.fossify.messages.helpers.FILE_SIZE_2_MB
 import org.fossify.messages.helpers.FILE_SIZE_300_KB
 import org.fossify.messages.helpers.FILE_SIZE_600_KB
 import org.fossify.messages.helpers.FILE_SIZE_NONE
+import org.fossify.messages.helpers.KEYWORD_LIST
+import org.fossify.messages.helpers.KeywordList
 import org.fossify.messages.helpers.LOCK_SCREEN_NOTHING
 import org.fossify.messages.helpers.LOCK_SCREEN_SENDER
 import org.fossify.messages.helpers.LOCK_SCREEN_SENDER_MESSAGE
@@ -105,6 +107,7 @@ class SettingsActivity : SimpleActivity() {
         setupLanguage()
         setupManageBlockedNumbers()
         setupManageBlockedKeywords()
+        setupManageAllowedLists()
         setupChangeDateTimeFormat()
         setupFontSize()
         setupShowCharacterCounter()
@@ -220,6 +223,19 @@ class SettingsActivity : SimpleActivity() {
             Intent(this@SettingsActivity, ManageBlockedKeywordsActivity::class.java).apply {
                 startActivity(this)
             }
+        }
+    }
+
+    // sms-man: allowed numbers / keywords share the blocked keywords screen
+    private fun setupManageAllowedLists() = binding.apply {
+        settingsManageAllowedNumbersHolder.setOnClickListener { openKeywordList(KeywordList.ALLOWED_NUMBERS) }
+        settingsManageAllowedKeywordsHolder.setOnClickListener { openKeywordList(KeywordList.ALLOWED_KEYWORDS) }
+    }
+
+    private fun openKeywordList(list: KeywordList) {
+        Intent(this, ManageBlockedKeywordsActivity::class.java).apply {
+            putExtra(KEYWORD_LIST, list.name)
+            startActivity(this)
         }
     }
 
@@ -353,13 +369,6 @@ class SettingsActivity : SimpleActivity() {
 
         settingsSpamTestHolder.setOnClickListener { testSpamApi() }
 
-        settingsSpamAllowedHolder.setOnClickListener {
-            if (config.spamAllowedSenders.isEmpty()) return@setOnClickListener
-            ConfirmationDialog(this@SettingsActivity, getString(R.string.spam_clear_allowed_senders_confirmation)) {
-                config.spamAllowedSenders = emptySet()
-                updateSpamTexts()
-            }
-        }
     }
 
     private fun updateSpamTexts() = binding.apply {
@@ -368,7 +377,6 @@ class SettingsActivity : SimpleActivity() {
         settingsSpamApiToken.text =
             if (token.isEmpty()) getString(R.string.spam_not_set)
             else getString(R.string.spam_token_set, token.takeLast(4))
-        settingsSpamAllowed.text = getString(R.string.spam_allowed_senders, config.spamAllowedSenders.size)
         settingsSpamTest.text = ""
         settingsSpamTest.beGone()
     }

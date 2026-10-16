@@ -175,10 +175,23 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(SPAM_SKIP_CODES, true)
         set(spamSkipCodes) = prefs.edit().putBoolean(SPAM_SKIP_CODES, spamSkipCodes).apply()
 
-    /** Senders the user marked "Not spam": they are never checked again. Stored normalized. */
-    var spamAllowedSenders: Set<String>
-        get() = prefs.getStringSet(SPAM_ALLOWED_SENDERS, HashSet<String>())!!
-        set(spamAllowedSenders) = prefs.edit().putStringSet(SPAM_ALLOWED_SENDERS, spamAllowedSenders).apply()
+    fun getKeywordList(list: KeywordList): Set<String> = prefs.getStringSet(list.prefKey, HashSet<String>())!!
+
+    fun addToKeywordList(list: KeywordList, value: String) {
+        prefs.edit().putStringSet(list.prefKey, getKeywordList(list).plus(value)).apply()
+    }
+
+    fun removeFromKeywordList(list: KeywordList, value: String) {
+        prefs.edit().putStringSet(list.prefKey, getKeywordList(list).minus(value)).apply()
+    }
+
+    /** Senders that always go to the inbox, never to the API. "Not spam" adds the sender here. */
+    val allowedNumbers: Set<String>
+        get() = getKeywordList(KeywordList.ALLOWED_NUMBERS)
+
+    /** Words: a message that contains one always goes to the inbox, never to the API. */
+    val allowedKeywords: Set<String>
+        get() = getKeywordList(KeywordList.ALLOWED_KEYWORDS)
 
     val isSpamFilterConfigured: Boolean
         get() = spamFilterEnabled && spamApiUrl.isNotEmpty() && spamApiToken.isNotEmpty()

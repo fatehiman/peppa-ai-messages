@@ -8,10 +8,17 @@ import org.fossify.commons.extensions.showKeyboard
 import org.fossify.commons.extensions.value
 import org.fossify.messages.databinding.DialogAddBlockedKeywordBinding
 import org.fossify.messages.extensions.config
+import org.fossify.messages.helpers.KeywordList
 
-class AddBlockedKeywordDialog(val activity: BaseSimpleActivity, private val originalKeyword: String? = null, val callback: () -> Unit) {
+class AddBlockedKeywordDialog(
+    val activity: BaseSimpleActivity,
+    private val originalKeyword: String? = null,
+    private val list: KeywordList = KeywordList.BLOCKED_KEYWORDS,
+    val callback: () -> Unit
+) {
     init {
         val binding = DialogAddBlockedKeywordBinding.inflate(activity.layoutInflater).apply {
+            addBlockedKeywordHint.hint = activity.getString(list.hintRes)
             if (originalKeyword != null) {
                 addBlockedKeywordEdittext.setText(originalKeyword)
             }
@@ -26,11 +33,11 @@ class AddBlockedKeywordDialog(val activity: BaseSimpleActivity, private val orig
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                         val newBlockedKeyword = binding.addBlockedKeywordEdittext.value
                         if (originalKeyword != null && newBlockedKeyword != originalKeyword) {
-                            activity.config.removeBlockedKeyword(originalKeyword)
+                            activity.config.removeFromKeywordList(list, originalKeyword)
                         }
 
                         if (newBlockedKeyword.isNotEmpty()) {
-                            activity.config.addBlockedKeyword(newBlockedKeyword)
+                            activity.config.addToKeywordList(list, newBlockedKeyword)
                         }
 
                         callback()

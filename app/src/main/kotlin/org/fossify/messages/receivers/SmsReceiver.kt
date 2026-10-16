@@ -4,15 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
-import org.fossify.commons.extensions.baseConfig
 import org.fossify.commons.extensions.getMyContactsCursor
-import org.fossify.commons.extensions.isNumberBlocked
-import org.fossify.commons.helpers.ContactLookupResult
 import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.models.PhoneNumber
 import org.fossify.commons.models.SimpleContact
-import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.getConversations
 import org.fossify.messages.extensions.getNameFromAddress
 import org.fossify.messages.extensions.getNotificationBitmap
@@ -24,7 +20,6 @@ import org.fossify.messages.extensions.shouldUnarchive
 import org.fossify.messages.extensions.showReceivedMessageNotification
 import org.fossify.messages.extensions.spamMessagesDB
 import org.fossify.messages.extensions.updateConversationArchivedStatus
-import org.fossify.messages.helpers.ReceiverUtils.isMessageFilteredOut
 import org.fossify.messages.helpers.SpamFilter
 import org.fossify.messages.helpers.refreshConversations
 import org.fossify.messages.helpers.refreshMessages
@@ -49,21 +44,18 @@ class SmsReceiver : BroadcastReceiver() {
                 val status = parts.last().status
                 val body = buildString { parts.forEach { append(it.messageBody.orEmpty()) } }
 
-                if (isMessageFilteredOut(appContext, body)) return@ensureBackgroundThread
-                if (appContext.isNumberBlocked(address)) return@ensureBackgroundThread
-                if (appContext.baseConfig.blockUnknownNumbers) {
-                    val privateCursor =
-                        appContext.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true)
-                    val result = SimpleContactsHelper(appContext).existsSync(address, privateCursor)
-                    if (result == ContactLookupResult.NotFound) return@ensureBackgroundThread
-                }
-
                 val date = System.currentTimeMillis()
                 val subscriptionId = intent.getIntExtra("subscription", -1)
 
-                // sms-man: spam goes only to the app's own spam folder: no system DB row, no thread, no notification.
+                // sms-man: blocked numbers / keywords and spam go only to the app's own spam folder (no system DB
+                // row, no thread, no notification), instead of being dropped. See SpamFilter.decide for the rules.
                 // This runs before getThreadId(), which would create an empty thread in the system DB.
-                if (isSpam(appContext, address, body, date, subscriptionId)) return@ensureBackgroundThread
+                val decision = SpamFilter.decide(appContext, address, body)
+                if (decision is SpamFilter.Decision.Spam &&
+                    saveSpam(appContext, address, body, date, subscriptionId, decision)
+                ) {
+                    return@ensureBackgroundThread
+                }
 
                 val threadId = appContext.getThreadId(address)
 
@@ -83,17 +75,15 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    /** Ask the spam API; if it says spam, save the SMS in the spam folder and return true. Fail-open. */
-    private fun isSpam(context: Context, address: String, body: String, date: Long, subscriptionId: Int): Boolean {
-        if (!context.config.isSpamFilterConfigured) return false
-        val isContact = context.config.spamSkipContacts &&
-            context.getMyContactsCursor(favoritesOnly = false, withPhoneNumbersOnly = true).use {
-                SimpleContactsHelper(context).existsSync(address, it) is ContactLookupResult.Found
-            }
-        if (!SpamFilter.shouldCheck(context, address, body, isContact)) return false
-
-        val result = SpamFilter.check(context, address, body)
-        if (result !is SpamFilter.Result.Spam) return false
+    /** Save the SMS in the spam folder. false = it could not be saved (then it goes to the inbox). */
+    private fun saveSpam(
+        context: Context,
+        address: String,
+        body: String,
+        date: Long,
+        subscriptionId: Int,
+        decision: SpamFilter.Decision.Spam
+    ): Boolean {
         return try {
             context.spamMessagesDB.insert(
                 SpamMessage(
@@ -101,8 +91,8 @@ class SmsReceiver : BroadcastReceiver() {
                     body = body,
                     date = date,
                     subscriptionId = subscriptionId,
-                    reason = result.reason,
-                    percent = result.percent
+                    reason = decision.reason,
+                    percent = decision.percent
                 )
             )
             true

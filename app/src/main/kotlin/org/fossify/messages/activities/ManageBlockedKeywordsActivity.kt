@@ -26,16 +26,21 @@ import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.toArrayList
 import org.fossify.messages.helpers.BlockedKeywordsExporter
 import org.fossify.messages.helpers.BlockedKeywordsImporter
+import org.fossify.messages.helpers.KEYWORD_LIST
+import org.fossify.messages.helpers.KeywordList
 import java.io.FileOutputStream
 import java.io.OutputStream
 
+// sms-man: this screen also manages "allowed keywords" and "allowed numbers" (extra KEYWORD_LIST)
 class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListener {
 
     private val binding by viewBinding(ActivityManageBlockedKeywordsBinding::inflate)
+    private val list by lazy { KeywordList.fromName(intent.getStringExtra(KEYWORD_LIST)) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        setupListTexts()
         updateBlockedKeywords()
         setupOptionsMenu()
 
@@ -51,6 +56,19 @@ class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListe
             setTextColor(getProperPrimaryColor())
             setOnClickListener {
                 addOrEditBlockedKeyword()
+            }
+        }
+    }
+
+    private fun setupListTexts() {
+        binding.blockKeywordsToolbar.title = getString(list.titleRes)
+        binding.manageBlockedKeywordsPlaceholder.text = getString(list.emptyRes)
+        binding.manageBlockedKeywordsPlaceholder2.text = getString(list.addRes)
+        binding.blockKeywordsToolbar.menu.apply {
+            findItem(R.id.add_blocked_keyword).title = getString(list.addRes)
+            if (list != KeywordList.BLOCKED_KEYWORDS) {
+                findItem(R.id.import_blocked_keywords).title = getString(R.string.import_from_file)
+                findItem(R.id.export_blocked_keywords).title = getString(R.string.export_to_file)
             }
         }
     }
@@ -143,7 +161,7 @@ class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListe
 
     private fun importBlockedKeywords(path: String) {
         ensureBackgroundThread {
-            val result = BlockedKeywordsImporter(this).importBlockedKeywords(path)
+            val result = BlockedKeywordsImporter(this, list).importBlockedKeywords(path)
             toast(
                 when (result) {
                     BlockedKeywordsImporter.ImportResult.IMPORT_OK -> org.fossify.commons.R.string.importing_successful
@@ -156,7 +174,7 @@ class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListe
 
     private fun exportBlockedKeywordsTo(outputStream: OutputStream?) {
         ensureBackgroundThread {
-            val blockedKeywords = config.blockedKeywords.toArrayList()
+            val blockedKeywords = config.getKeywordList(list).toArrayList()
             if (blockedKeywords.isEmpty()) {
                 toast(org.fossify.commons.R.string.no_entries_for_exporting)
             } else {
@@ -176,7 +194,8 @@ class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListe
         ExportBlockedKeywordsDialog(
             activity = this,
             path = config.lastBlockedKeywordExportPath,
-            hidePath = true
+            hidePath = true,
+            fileTitle = getString(list.fileNameRes)
         ) { file ->
             try {
                 createDocument.launch(file.name)
@@ -197,11 +216,12 @@ class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListe
 
     private fun updateBlockedKeywords() {
         ensureBackgroundThread {
-            val blockedKeywords = config.blockedKeywords.sorted().toArrayList()
+            val blockedKeywords = config.getKeywordList(list).sorted().toArrayList()
             runOnUiThread {
                 ManageBlockedKeywordsAdapter(
                     activity = this,
                     blockedKeywords = blockedKeywords,
+                    list = list,
                     listener = this,
                     recyclerView = binding.manageBlockedKeywordsList
                 ) {
@@ -217,7 +237,7 @@ class ManageBlockedKeywordsActivity : SimpleActivity(), RefreshRecyclerViewListe
     }
 
     private fun addOrEditBlockedKeyword(keyword: String? = null) {
-        AddBlockedKeywordDialog(this, keyword) {
+        AddBlockedKeywordDialog(this, keyword, list) {
             updateBlockedKeywords()
         }
     }

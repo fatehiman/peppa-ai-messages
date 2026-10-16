@@ -158,6 +158,37 @@
 
             </RelativeLayout>
 
+            <!-- sms-man -->
+            <RelativeLayout
+                android:id="@+id/settings_manage_allowed_numbers_holder"
+                style="@style/SettingsHolderTextViewOneLinerStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_manage_allowed_numbers"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manage_allowed_numbers" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_manage_allowed_keywords_holder"
+                style="@style/SettingsHolderTextViewOneLinerStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_manage_allowed_keywords"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manage_allowed_keywords" />
+
+            </RelativeLayout>
+
             <RelativeLayout
                 android:id="@+id/settings_font_size_holder"
                 style="@style/SettingsHolderTextViewStyle"
@@ -475,29 +506,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/settings_spam_test_label"
-                    tools:text="@string/spam_not_set" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/settings_spam_allowed_holder"
-                style="@style/SettingsHolderTextViewStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <org.fossify.commons.views.MyTextView
-                    android:id="@+id/settings_spam_allowed_label"
-                    style="@style/SettingsTextLabelStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/spam_clear_allowed_senders" />
-
-                <org.fossify.commons.views.MyTextView
-                    android:id="@+id/settings_spam_allowed"
-                    style="@style/SettingsTextValueStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/settings_spam_allowed_label"
                     tools:text="@string/spam_not_set" />
 
             </RelativeLayout>

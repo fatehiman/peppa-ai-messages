@@ -8,6 +8,7 @@ import java.io.File
 
 class BlockedKeywordsImporter(
     private val activity: Activity,
+    private val list: KeywordList = KeywordList.BLOCKED_KEYWORDS,
 ) {
     enum class ImportResult {
         IMPORT_FAIL, IMPORT_OK
@@ -22,7 +23,7 @@ class BlockedKeywordsImporter(
             }
             if (keywords.isNotEmpty()) {
                 keywords.forEach { keyword: String ->
-                    activity.config.addBlockedKeyword(keyword)
+                    activity.config.addToKeywordList(list, keyword)
                 }
                 ImportResult.IMPORT_OK
             } else {

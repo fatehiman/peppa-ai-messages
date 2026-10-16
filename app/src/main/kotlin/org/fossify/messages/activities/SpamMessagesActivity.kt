@@ -140,11 +140,18 @@ class SpamMessagesActivity : SimpleActivity() {
     }
 
     private fun infoText(message: SpamMessage): String {
-        val reason = when (message.reason) {
-            "sender" -> getString(R.string.spam_reason_sender)
-            "phrase" -> getString(R.string.spam_reason_phrase)
-            "ai" -> if (message.percent != null) getString(R.string.spam_reason_ai, message.percent) else "AI"
-            SpamFilter.REASON_REPORT -> getString(R.string.spam_reason_report)
+        val reason = when {
+            message.reason == "sender" -> getString(R.string.spam_reason_sender)
+            message.reason == "phrase" -> getString(R.string.spam_reason_phrase)
+            message.reason == "ai" ->
+                if (message.percent != null) getString(R.string.spam_reason_ai, message.percent) else "AI"
+            message.reason == SpamFilter.REASON_REPORT -> getString(R.string.spam_reason_report)
+            message.reason == SpamFilter.REASON_BLOCKED_NUMBER -> getString(R.string.spam_reason_blocked_number)
+            message.reason == SpamFilter.REASON_UNKNOWN_NUMBER -> getString(R.string.spam_reason_unknown_number)
+            message.reason.startsWith(SpamFilter.REASON_BLOCKED_KEYWORD_PREFIX) -> getString(
+                R.string.spam_reason_blocked_keyword,
+                message.reason.removePrefix(SpamFilter.REASON_BLOCKED_KEYWORD_PREFIX)
+            )
             else -> message.reason
         }
         val slot = simSlots[message.subscriptionId]

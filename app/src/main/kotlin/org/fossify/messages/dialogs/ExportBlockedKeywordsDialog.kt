@@ -25,6 +25,7 @@ class ExportBlockedKeywordsDialog(
     val activity: BaseSimpleActivity,
     val path: String,
     val hidePath: Boolean,
+    val fileTitle: String = activity.getString(R.string.blocked_keywords),
     callback: (file: File) -> Unit,
 ) {
     private var realPath = path.ifEmpty { activity.internalStoragePath }
@@ -34,7 +35,7 @@ class ExportBlockedKeywordsDialog(
         val view =
             DialogExportBlockedKeywordsBinding.inflate(activity.layoutInflater, null, false).apply {
                 exportBlockedKeywordsFolder.text = activity.humanizePath(realPath)
-                exportBlockedKeywordsFilename.setText("${activity.getString(R.string.blocked_keywords)}_${activity.getCurrentFormattedDateTime()}")
+                exportBlockedKeywordsFilename.setText("${fileTitle}_${activity.getCurrentFormattedDateTime()}")
 
                 if (hidePath) {
                     exportBlockedKeywordsFolderLabel.beGone()
