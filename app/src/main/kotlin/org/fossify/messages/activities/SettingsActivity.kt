@@ -2,6 +2,7 @@ package org.fossify.messages.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import org.fossify.commons.activities.ManageBlockedNumbersActivity
 import org.fossify.commons.dialogs.ChangeDateTimeFormatDialog
@@ -14,7 +15,10 @@ import org.fossify.commons.extensions.beVisibleIf
 import org.fossify.commons.extensions.formatWithDeprecatedBadge
 import org.fossify.commons.extensions.getBlockedNumbers
 import org.fossify.commons.extensions.getFontSizeText
+import org.fossify.commons.extensions.getAlertDialogBuilder
 import org.fossify.commons.extensions.getProperPrimaryColor
+import org.fossify.commons.extensions.getProperTextColor
+import org.fossify.commons.extensions.setupDialogStuff
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.extensions.updateTextColors
 import org.fossify.commons.extensions.viewBinding
@@ -34,6 +38,8 @@ import org.fossify.messages.databinding.ActivitySettingsBinding
 import org.fossify.messages.dialogs.ExportMessagesDialog
 import org.fossify.messages.dialogs.SpamSettingDialog
 import org.fossify.messages.extensions.config
+import org.fossify.messages.extensions.countOldMessages
+import org.fossify.messages.extensions.deleteOldMessages
 import org.fossify.messages.extensions.emptyMessagesRecycleBin
 import org.fossify.messages.extensions.messagesDB
 import org.fossify.messages.helpers.FILE_SIZE_100_KB
@@ -53,6 +59,8 @@ import org.fossify.messages.helpers.SpamFilter
 import org.fossify.messages.helpers.refreshConversations
 import java.util.Locale
 import kotlin.system.exitProcess
+
+private const val MAX_AUTO_DELETE_DAYS = 36500
 
 class SettingsActivity : SimpleActivity() {
     private var blockedNumbersAtPause = -1
@@ -118,6 +126,7 @@ class SettingsActivity : SimpleActivity() {
         setupGroupMessageAsMMS()
         setupSpamFilter()
         setupKeepConversationsArchived()
+        setupAutoDeleteOld()
         setupLockScreenVisibility()
         setupMMSFileSizeLimit()
         setupUseRecycleBin()
@@ -141,6 +150,7 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsSpamLabel,
             binding.settingsArchivedMessagesLabel,
             binding.settingsRecycleBinLabel,
+            binding.settingsOldMessagesLabel,
             binding.settingsSecurityLabel,
             binding.settingsMigratingLabel
         ).forEach {
@@ -397,6 +407,92 @@ class SettingsActivity : SimpleActivity() {
             }
             runOnUiThread { binding.settingsSpamTest.text = text }
         }
+    }
+
+    // sms-man: delete old messages
+    private fun setupAutoDeleteOld() = binding.apply {
+        settingsAutoDeleteOld.isChecked = config.autoDeleteOldEnabled
+        settingsAutoDeleteOldDays.text = getString(R.string.days_count, config.autoDeleteOldDays)
+
+        settingsAutoDeleteOldHolder.setOnClickListener {
+            settingsAutoDeleteOld.toggle()
+            config.autoDeleteOldEnabled = settingsAutoDeleteOld.isChecked
+            if (config.autoDeleteOldEnabled) askDeleteOldMessagesNow()
+        }
+
+        settingsAutoDeleteOldDaysHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.delete_messages_older_than,
+                value = config.autoDeleteOldDays.toString(),
+                hint = getString(R.string.days),
+                isSecret = false,
+                isNumber = true,
+                validate = { value ->
+                    if (value.toIntOrNull() in 1..MAX_AUTO_DELETE_DAYS) null
+                    else getString(R.string.auto_delete_days_invalid)
+                }
+            ) { value ->
+                val days = value.toIntOrNull() ?: return@SpamSettingDialog
+                config.autoDeleteOldDays = days
+                settingsAutoDeleteOldDays.text = getString(R.string.days_count, days)
+                if (config.autoDeleteOldEnabled) askDeleteOldMessagesNow()
+            }
+        }
+    }
+
+    /**
+     * The option was turned on or the days changed: ask before the first delete.
+     * "No" keeps the messages for now, but the daily run deletes them in about 24 hours (the user is told).
+     */
+    private fun askDeleteOldMessagesNow() {
+        val days = config.autoDeleteOldDays
+        toast(R.string.auto_delete_checking)
+        ensureBackgroundThread {
+            val count = countOldMessages(days)
+            runOnUiThread {
+                if (count == 0) {
+                    config.lastAutoDeleteOld = System.currentTimeMillis()
+                    toast(getString(R.string.auto_delete_nothing, days))
+                    return@runOnUiThread
+                }
+                showMessageDialog(
+                    message = getString(R.string.auto_delete_confirm, count, days),
+                    positiveId = org.fossify.commons.R.string.delete,
+                    negativeId = org.fossify.commons.R.string.cancel,
+                    onNegative = {
+                        config.lastAutoDeleteOld = System.currentTimeMillis()
+                        showMessageDialog(getString(R.string.auto_delete_postponed, days))
+                    }
+                ) {
+                    toast(R.string.auto_delete_deleting)
+                    ensureBackgroundThread {
+                        val deleted = deleteOldMessages(days)
+                        refreshConversations()
+                        toast(getString(R.string.auto_delete_done, deleted))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showMessageDialog(
+        message: String,
+        positiveId: Int = org.fossify.commons.R.string.ok,
+        negativeId: Int = 0,
+        onNegative: () -> Unit = {},
+        onPositive: () -> Unit = {},
+    ) {
+        val view = TextView(this).apply {
+            val padding = resources.getDimensionPixelSize(org.fossify.commons.R.dimen.big_margin)
+            setPadding(padding, padding, padding, 0)
+            setTextColor(getProperTextColor())
+            text = message
+        }
+        getAlertDialogBuilder()
+            .setPositiveButton(positiveId) { _, _ -> onPositive() }
+            .apply { if (negativeId != 0) setNegativeButton(negativeId) { _, _ -> onNegative() } }
+            .apply { setupDialogStuff(view, this, cancelOnTouchOutside = false) }
     }
 
     private fun setupKeepConversationsArchived() = binding.apply {

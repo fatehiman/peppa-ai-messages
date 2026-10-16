@@ -9,6 +9,7 @@ import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.models.PhoneNumber
 import org.fossify.commons.models.SimpleContact
+import org.fossify.messages.extensions.checkAndDeleteOldMessages
 import org.fossify.messages.extensions.getConversations
 import org.fossify.messages.extensions.getNameFromAddress
 import org.fossify.messages.extensions.getNotificationBitmap
@@ -69,6 +70,7 @@ class SmsReceiver : BroadcastReceiver() {
                     subscriptionId = subscriptionId,
                     status = status
                 )
+                appContext.checkAndDeleteOldMessages() // sms-man: daily "delete old messages"
             } finally {
                 pending.finish()
             }

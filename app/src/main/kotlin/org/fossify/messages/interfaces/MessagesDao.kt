@@ -94,4 +94,11 @@ interface MessagesDao {
 
     @Query("DELETE FROM messages")
     fun deleteAll()
+
+    // sms-man: cache cleanup after old messages were deleted from the system database (date in seconds)
+    @Query("DELETE FROM messages WHERE date < :date AND is_scheduled = 0")
+    fun deleteOlderThan(date: Int)
+
+    @Query("DELETE FROM recycle_bin_messages WHERE id NOT IN (SELECT id FROM messages)")
+    fun deleteOrphanRecycleBinEntries()
 }

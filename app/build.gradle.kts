@@ -25,7 +25,7 @@ fun hasSigningVars(): Boolean {
 
 base {
     val versionCode = project.property("VERSION_CODE").toString().toInt()
-    archivesName = "sms-man-$versionCode"
+    archivesName = "peppa-ai-messages-$versionCode"
 }
 
 android {

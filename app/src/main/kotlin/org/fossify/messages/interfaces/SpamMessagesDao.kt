@@ -18,4 +18,10 @@ interface SpamMessagesDao {
 
     @Query("DELETE FROM spam_messages")
     fun deleteAll()
+
+    @Query("SELECT COUNT(*) FROM spam_messages WHERE date < :date")
+    fun countOlderThan(date: Long): Int
+
+    @Query("DELETE FROM spam_messages WHERE date < :date")
+    fun deleteOlderThan(date: Long): Int
 }

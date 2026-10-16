@@ -185,6 +185,19 @@ class Config(context: Context) : BaseConfig(context) {
         prefs.edit().putStringSet(list.prefKey, getKeywordList(list).minus(value)).apply()
     }
 
+    // sms-man: delete messages older than [autoDeleteOldDays] days, once a day, without asking
+    var autoDeleteOldEnabled: Boolean
+        get() = prefs.getBoolean(AUTO_DELETE_OLD_ENABLED, false)
+        set(autoDeleteOldEnabled) = prefs.edit().putBoolean(AUTO_DELETE_OLD_ENABLED, autoDeleteOldEnabled).apply()
+
+    var autoDeleteOldDays: Int
+        get() = prefs.getInt(AUTO_DELETE_OLD_DAYS, DEFAULT_AUTO_DELETE_OLD_DAYS)
+        set(autoDeleteOldDays) = prefs.edit().putInt(AUTO_DELETE_OLD_DAYS, autoDeleteOldDays).apply()
+
+    var lastAutoDeleteOld: Long
+        get() = prefs.getLong(LAST_AUTO_DELETE_OLD, 0L)
+        set(lastAutoDeleteOld) = prefs.edit().putLong(LAST_AUTO_DELETE_OLD, lastAutoDeleteOld).apply()
+
     /** Senders that always go to the inbox, never to the API. "Not spam" adds the sender here. */
     val allowedNumbers: Set<String>
         get() = getKeywordList(KeywordList.ALLOWED_NUMBERS)

@@ -9,7 +9,7 @@ import org.fossify.commons.extensions.showKeyboard
 import org.fossify.messages.databinding.DialogSpamSettingBinding
 
 /**
- * sms-man: edit one text setting of the spam filter (API URL or token).
+ * sms-man: edit one text setting (spam API URL or token, days for "delete old messages").
  * [validate] returns an error message, or null when the value is OK. An empty value is allowed (= not set).
  */
 class SpamSettingDialog(
@@ -18,6 +18,7 @@ class SpamSettingDialog(
     value: String,
     hint: String,
     isSecret: Boolean,
+    isNumber: Boolean = false,
     validate: (String) -> String?,
     callback: (String) -> Unit,
 ) {
@@ -25,7 +26,9 @@ class SpamSettingDialog(
         val binding = DialogSpamSettingBinding.inflate(activity.layoutInflater).apply {
             spamSettingInputLayout.hint = hint
             spamSettingEditText.setText(value)
-            if (isSecret) {
+            if (isNumber) {
+                spamSettingEditText.inputType = InputType.TYPE_CLASS_NUMBER
+            } else if (isSecret) {
                 spamSettingEditText.inputType =
                     InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_launcher_name">SMS Man</string>
+    <string name="app_launcher_name">Peppa AI Messages</string>
     <string name="type_a_message">Type a message…</string>
     <string name="message_not_sent_short">Message not sent</string>
     <string name="message_not_sent_touch_retry">Not sent. Touch to retry.</string>
@@ -233,4 +233,16 @@
     <string name="no_allowed_keywords">No allowed keywords. Messages that contain one of these words always go to the inbox and are never sent to the spam API.</string>
     <string name="import_from_file">Import from a file</string>
     <string name="export_to_file">Export to a file</string>
+    <string name="old_messages">Old messages</string>
+    <string name="auto_delete_old">Delete old messages automatically every day</string>
+    <string name="delete_messages_older_than">Delete messages older than</string>
+    <string name="days_count">%d days</string>
+    <string name="days">Days</string>
+    <string name="auto_delete_days_invalid">Enter a number from 1 to 36500</string>
+    <string name="auto_delete_checking">Counting old messages…</string>
+    <string name="auto_delete_nothing">No messages are older than %d days.</string>
+    <string name="auto_delete_confirm">%1$d messages are older than %2$d days. Delete them now?\n\nThis cannot be undone. Use “Export messages” first if you want a backup.</string>
+    <string name="auto_delete_postponed">Nothing was deleted now.\n\nThe option is on, so messages older than %d days will be deleted automatically in about 24 hours, without asking. Turn the option off if you want to keep them.</string>
+    <string name="auto_delete_deleting">Deleting old messages…</string>
+    <string name="auto_delete_done">%d old messages deleted</string>
 </resources>

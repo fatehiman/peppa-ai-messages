@@ -82,15 +82,15 @@ object SpamFilter {
 
     /**
      * Where does a new incoming SMS go? Blocking (it may call the API); call it from a background thread.
-     * The order of the rules matters:
-     *  1. blocked number (Fossify list)      -> spam folder
-     *  2. blocked keyword                    -> spam folder
-     *  3. "block unknown numbers" + unknown  -> spam folder
-     *  4. contact (setting, on by default)   -> inbox
-     *  5. allowed number / allowed keyword   -> inbox
-     *  6. looks like a login code (setting)  -> inbox
-     *  7. spam filter off or not set up      -> inbox
-     *  8. the API: spam -> spam folder; not spam, error, timeout (8 s), no internet -> inbox
+     * The order of the rules matters: "allowed" rules come before "blocked" rules.
+     *  1. contact (setting, on by default)               -> inbox
+     *  2. allowed number / allowed keyword               -> inbox
+     *  3. looks like a login code (setting, on)          -> inbox
+     *  4. blocked number / blocked keyword /
+     *     "block unknown numbers" + not a contact        -> spam folder
+     *  5. spam filter off or not set up                  -> inbox
+     *  6. the API: spam -> spam folder; not spam, error, timeout (8 s), no internet -> inbox
+     * Numbers in Android's system block list never get here: Android drops those SMS itself.
      */
     fun decide(context: Context, address: String, body: String): Decision {
         val config = context.config
@@ -100,6 +100,15 @@ object SpamFilter {
             }
         }
 
+        val isAllowed = when {
+            config.spamSkipContacts && contactResult is ContactLookupResult.Found -> true
+            isAllowedNumber(context, address) -> true
+            config.allowedKeywords.any { it.isNotEmpty() && body.contains(it, ignoreCase = true) } -> true
+            config.spamSkipCodes && looksLikeCode(body) -> true
+            else -> false
+        }
+        if (isAllowed) return Decision.Inbox
+
         if (context.isNumberBlocked(address)) return Decision.Spam(REASON_BLOCKED_NUMBER, null)
         ReceiverUtils.findBlockedKeyword(context, body)?.let {
             return Decision.Spam(REASON_BLOCKED_KEYWORD_PREFIX + it, null)
@@ -108,16 +117,7 @@ object SpamFilter {
             return Decision.Spam(REASON_UNKNOWN_NUMBER, null)
         }
 
-        val isAllowed = when {
-            config.spamSkipContacts && contactResult is ContactLookupResult.Found -> true
-            isAllowedNumber(context, address) -> true
-            config.allowedKeywords.any { it.isNotEmpty() && body.contains(it, ignoreCase = true) } -> true
-            config.spamSkipCodes && looksLikeCode(body) -> true
-            !config.isSpamFilterConfigured -> true
-            else -> false
-        }
-        if (isAllowed) return Decision.Inbox
-
+        if (!config.isSpamFilterConfigured) return Decision.Inbox
         return when (val result = check(context, address, body)) {
             is Result.Spam -> Decision.Spam(result.reason, result.percent)
             else -> Decision.Inbox

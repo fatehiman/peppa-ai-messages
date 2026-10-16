@@ -54,6 +54,7 @@ import org.fossify.messages.R
 import org.fossify.messages.adapters.ConversationsAdapter
 import org.fossify.messages.adapters.SearchResultsAdapter
 import org.fossify.messages.databinding.ActivityMainBinding
+import org.fossify.messages.extensions.checkAndDeleteOldMessages
 import org.fossify.messages.extensions.checkAndDeleteOldRecycleBinMessages
 import org.fossify.messages.extensions.clearAllMessagesIfNeeded
 import org.fossify.messages.extensions.clearExpiredScheduledMessages
@@ -97,6 +98,7 @@ class MainActivity : SimpleActivity() {
         setupEdgeToEdge(padBottomImeAndSystem = listOf(binding.conversationsList))
 
         checkAndDeleteOldRecycleBinMessages()
+        checkAndDeleteOldMessages()
         clearAllMessagesIfNeeded {
             loadMessages()
         }

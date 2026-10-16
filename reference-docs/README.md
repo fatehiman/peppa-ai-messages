@@ -6,3 +6,4 @@ Files here are not part of the app code. They are committed to GitHub, but never
 | --- | --- |
 | [research-2026-10.md](research-2026-10.md) | Why a Fossify fork: the research behind this project (2026-10-16) |
 | [fossify-upstream-README.md](fossify-upstream-README.md) | The original README of Fossify Messages |
+| [graphics/icon.png](graphics/icon.png) | Source image of the app icon (the launcher icon is generated from it, see the main README) |
