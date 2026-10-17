@@ -17,11 +17,26 @@ export / import of all messages (JSON, and the XML of "SMS Backup & Restore").
   [Releases](https://github.com/fatehiman/peppa-ai-messages/releases) and install it with ADB (see below).
 - The original README is in [reference-docs/fossify-upstream-README.md](reference-docs/fossify-upstream-README.md).
 
+## Documentation
+
+The app works without any server. Two optional features need a small HTTPS server of your own. The
+author's servers are private, so these guides describe the API format, with examples and a minimal
+server you can start from:
+
+| Guide | For |
+| --- | --- |
+| [SPAM-API.md](SPAM-API.md) | **Spam filter (AI)**: `POST …/check` (is this SMS spam?) and `POST …/feedback` ("Report as spam" / "Not spam"). Request and answer format, errors, timeouts, curl examples, a minimal Python (FastAPI) server |
+| [TELEGRAM-PICTURES-API.md](TELEGRAM-PICTURES-API.md) | **Telegram profile pictures**: `GET …/me` (connection test) and `GET …/phone/{+number}/photo?format=image`. Status codes and what the app does with them, curl examples, a minimal Python (FastAPI + Telethon) server, how to keep the Telegram account safe |
+
+Other pages in this file: [what is added](#what-is-added) · [how a new SMS is handled](#how-a-new-sms-is-handled-in-this-order) ·
+[delete old messages](#delete-old-messages) · [install on the phone](#install-on-the-phone-samsung-a54-or-any-android-8) ·
+[build and release](#build-and-release) · [update from upstream](#update-from-upstream-fossify)
+
 ## What is added
 
 | Where | What |
 | --- | --- |
-| Settings → **Spam filter (AI)** | On/off, **API endpoint URL**, **API token**, "Never check messages from my contacts" (on), "Never check messages that look like login codes" (on), **Wait for the API answer** (8, 10, 15, 20, 25 or 30 seconds, default 15; the time also covers connecting, which can be slow on mobile data), **Test the connection** (shows the answer time, for example `answer in 1.7 s`) |
+| Settings → **Spam filter (AI)** | Your own server: [SPAM-API.md](SPAM-API.md). On/off, **API endpoint URL**, **API token**, "Never check messages from my contacts" (on), "Never check messages that look like login codes" (on), **Wait for the API answer** (8, 10, 15, 20, 25 or 30 seconds, default 15; the time also covers connecting, which can be slow on mobile data), **Test the connection** (shows the answer time, for example `answer in 1.7 s`) |
 | Settings → **Manage allowed numbers** | Numbers or sender names that always go to the inbox and are never sent to the API. `0912…` also matches `+98912…`. "Not spam" adds the sender here |
 | Settings → **Manage allowed keywords** | Words: a message that contains one always goes to the inbox, never to the API (for example `کد تایید`, a bank name) |
 | Settings → **Old messages** | **Delete old messages automatically every day** (switch) and **Delete messages older than** (days, default 90). See below |
@@ -32,7 +47,7 @@ export / import of all messages (JSON, and the XML of "SMS Backup & Restore").
 | Conversation → **delivery reports** | With Settings → "Enable delivery reports" on, **every** delivered sent message shows the double tick (Fossify shows it only under the last message). The last sent message still shows one tick until it is delivered |
 | Conversation → select 1 message → ⋮ → **Properties** | Received message: **Sent at** (the time the sender sent it, from the SMS center) and **Received at** (the time it arrived on the phone). Sent message: **Sent at** and **Delivered at** (needs delivery reports). The times are read from the phone's SMS database (`date_sent`). "Sent at" of a received SMS is saved only for SMS received with this version or by an app that saves it (most do); messages moved back from the spam folder have no "Sent at" |
 | Icons of **numbers that are not contacts** | Fossify draws the first letter of the name, so every `+98…` number got a **+** icon. Now, in this order: (1) the **Telegram profile picture** (see the next row), (2) the first letter of the **call log note** of the number (Samsung's Phone app lets you add a note to a number; it is saved in Samsung's call log table `content://logs/historys`, column `sec_memo`), (3) the **first digits** without the country code: `+989133419544` → `913`, `+98500…` → `500`. Contacts and text senders (`BANK`) keep the normal letter. Used in the conversation list, the conversation, notifications, bubbles, shortcuts and search. Code: `Avatars.kt`, `CallLogNotes.kt` |
-| Settings → **Icons and profile pictures** | **Use the call log note of a number as its icon (Samsung)**: off by default; turning it on asks for the call log permission (`READ_CALL_LOG`). The notes are read again each time the main screen opens (at most once a minute). **Telegram profile pictures for numbers that are not contacts** and **… for contacts without a photo**: two switches, both off by default (a contact's own photo always wins). **Telegram API URL** (`https://telegram.peppasoft.com/api/v1`, project `E:\www	elegram-manager`; without `/phone/...` or `/me`), **Telegram API token**, **Only numbers that start with** (comma separated, default `+989` = all Iran mobiles; `+98500…` and short codes are never looked up) and **Test the connection** (`GET /me`) |
+| Settings → **Icons and profile pictures** | **Use the call log note of a number as its icon (Samsung)**: off by default; turning it on asks for the call log permission (`READ_CALL_LOG`). The notes are read again each time the main screen opens (at most once a minute). **Telegram profile pictures for numbers that are not contacts** and **… for contacts without a photo**: two switches, both off by default (a contact's own photo always wins). **Telegram API URL** (`https://telegram.peppasoft.com/api/v1`, project `E:\www\telegram-manager`; without `/phone/...` or `/me`; your own server: [TELEGRAM-PICTURES-API.md](TELEGRAM-PICTURES-API.md)), **Telegram API token**, **Only numbers that start with** (comma separated, default `+989` = all Iran mobiles; `+98500…` and short codes are never looked up) and **Test the connection** (`GET /me`) |
 | Telegram pictures: when and how | Asked only when an SMS arrives and when a conversation is opened, never while scrolling the list (so Telegram does not see many lookups at once). One request at a time in the background (connect 20 s, answer 60 s), the screen never waits. `GET <url>/phone/<+number>/photo?format=image`. The picture is made smaller (at most 256 px, about 10–20 KB, so 1000 pictures ≈ 15 MB). A picture, or "no Telegram user / no picture" (404), is kept for **20 days**, then asked again. Errors are tried again after 1 hour; `429`/`503` pause all requests (`Retry-After`, else 10 min); `401`/`403` pause 1 hour. **Cleanup**: every time a picture is shown (list, conversation, notification) the number counts as "seen"; once a day the files of numbers not seen or asked for **90 days** are deleted, and such a number is downloaded again when it comes back. Files: `filesDir/telegram_avatars/<number>.jpg`, `.none` ("no picture"), `.used` (last seen). Changing the URL deletes them. Code: `TelegramAvatars.kt` |
 | App | New name and icon ([reference-docs/graphics/icon.png](reference-docs/graphics/icon.png)). Fossify's "You are using a fake version of the app" warning is removed. Fossify Commons shows it in 3 places when the app id does not start with `org.fossify.` (randomly on about 1 in 51 screen opens, on every 100th start, and instead of "Customize colors" after 100 starts). Our `SplashActivity` does not extend `BaseSplashActivity`, and a build step in [build-logic/](build-logic/src/main/kotlin/RemoveFakeVersionWarning.kt) changes the library classes in every build: `showModdedAppWarning`, `fakeVersionCheck` and `FakeVersionCheck` get an empty body, and the "contains fossify" test always passes. The release APK has no copy of the text. After a Fossify Commons update, check: `unzip -p <apk> 'classes*.dex' \| grep -ac "You are using a fake"` must print `0` |
 
@@ -83,30 +98,17 @@ Code: [SpamFilter.kt](app/src/main/kotlin/org/fossify/messages/helpers/SpamFilte
 Room table `spam_messages` (database version 12, `MIGRATION_11_12` in
 [MessagesDatabase.kt](app/src/main/kotlin/org/fossify/messages/databases/MessagesDatabase.kt)).
 
-## The spam API (contract)
-
-The app works with any server that follows this contract.
+## The spam API (short)
 
 ```http
-POST /api/sms/check
-Authorization: Bearer <token>
-Content-Type: application/json
-
+POST /api/sms/check          Authorization: Bearer <token>
 {"sender": "+98912...", "body": "SMS text"}
+-> {"ok": true, "spam": true, "reason": "ai", "percent": 92}
 ```
 
-```json
-{"ok": true, "spam": true, "reason": "ai", "percent": 92}
-```
-
-Only `spam` (boolean) is required in the answer. `reason` (`sender` | `phrase` | `ai` | `none`) and
-`percent` (0–100 or `null`) are shown in the spam folder. Any non-2xx status means "not spam".
-
-Feedback goes to the URL `feedback` next to the check URL (`.../api/sms/check` → `.../api/sms/feedback`):
-
-```json
-{"sender": "+98912...", "body": "...", "spam": false}
-```
+Only `spam` (boolean) is required in the answer. Any error or timeout means "inbox". Feedback goes to
+`…/feedback` next to the check URL. The full format, examples and a sample server are in
+[SPAM-API.md](SPAM-API.md).
 
 The author's server is `https://notes.peppasoft.com/api/sms/check` (project `notes`, file
 `spam-api-manual-usage.md` there). The token is private: ask the server owner.
