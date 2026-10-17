@@ -79,6 +79,16 @@
             android:parentActivityName=".activities.MainActivity"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- sms-man: a conversation opened from a floating chat bubble (Android 11+) -->
+        <activity
+            android:name=".activities.BubbleThreadActivity"
+            android:allowEmbedded="true"
+            android:configChanges="orientation"
+            android:documentLaunchMode="always"
+            android:exported="false"
+            android:resizeableActivity="true"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".activities.NewConversationActivity"
             android:configChanges="orientation"

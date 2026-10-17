@@ -1,7 +1,9 @@
 package org.fossify.messages.activities
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import org.fossify.commons.activities.ManageBlockedNumbersActivity
@@ -18,6 +20,7 @@ import org.fossify.commons.extensions.getFontSizeText
 import org.fossify.commons.extensions.getAlertDialogBuilder
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.getProperTextColor
+import org.fossify.commons.extensions.notificationManager
 import org.fossify.commons.extensions.setupDialogStuff
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.extensions.updateTextColors
@@ -31,6 +34,8 @@ import org.fossify.commons.helpers.PROTECTION_FINGERPRINT
 import org.fossify.commons.helpers.SHOW_ALL_TABS
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
+import org.fossify.commons.helpers.isRPlus
+import org.fossify.commons.helpers.isSPlus
 import org.fossify.commons.helpers.isTiramisuPlus
 import org.fossify.commons.models.RadioItem
 import org.fossify.messages.R
@@ -42,6 +47,7 @@ import org.fossify.messages.extensions.countOldMessages
 import org.fossify.messages.extensions.deleteOldMessages
 import org.fossify.messages.extensions.emptyMessagesRecycleBin
 import org.fossify.messages.extensions.messagesDB
+import org.fossify.messages.extensions.notificationHelper
 import org.fossify.messages.helpers.FILE_SIZE_100_KB
 import org.fossify.messages.helpers.FILE_SIZE_1_MB
 import org.fossify.messages.helpers.FILE_SIZE_200_KB
@@ -128,6 +134,7 @@ class SettingsActivity : SimpleActivity() {
         setupKeepConversationsArchived()
         setupAutoDeleteOld()
         setupLockScreenVisibility()
+        setupBubbleNotifications()
         setupMMSFileSizeLimit()
         setupUseRecycleBin()
         setupEmptyRecycleBin()
@@ -503,6 +510,43 @@ class SettingsActivity : SimpleActivity() {
         }
     }
 
+    // sms-man: floating chat bubbles (Android 11+)
+    private fun setupBubbleNotifications() = binding.apply {
+        settingsBubbleNotificationsHolder.beVisibleIf(isRPlus())
+        settingsBubbleNotifications.isChecked = config.bubbleNotifications
+        settingsBubbleNotificationsHolder.setOnClickListener {
+            settingsBubbleNotifications.toggle()
+            config.bubbleNotifications = settingsBubbleNotifications.isChecked
+            if (!config.bubbleNotifications) {
+                notificationHelper.removeBubbles()
+            } else if (!areBubblesAllowed()) {
+                showMessageDialog(
+                    message = getString(R.string.bubbles_not_allowed),
+                    positiveId = R.string.open_settings,
+                    negativeId = org.fossify.commons.R.string.cancel,
+                ) {
+                    try {
+                        Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS).apply {
+                            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                            startActivity(this)
+                        }
+                    } catch (e: Exception) {
+                        toast(org.fossify.commons.R.string.no_app_found)
+                    }
+                }
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun areBubblesAllowed(): Boolean {
+        return if (isSPlus()) {
+            notificationManager.bubblePreference != NotificationManager.BUBBLE_PREFERENCE_NONE
+        } else {
+            notificationManager.areBubblesAllowed()
+        }
+    }
+
     private fun setupLockScreenVisibility() = binding.apply {
         settingsLockScreenVisibility.text = getLockScreenVisibilityText()
         settingsLockScreenVisibilityHolder.setOnClickListener {
@@ -514,6 +558,7 @@ class SettingsActivity : SimpleActivity() {
 
             RadioGroupDialog(this@SettingsActivity, items, config.lockScreenVisibilitySetting) {
                 config.lockScreenVisibilitySetting = it as Int
+                if (it != LOCK_SCREEN_SENDER_MESSAGE) notificationHelper.removeBubbles() // sms-man
                 settingsLockScreenVisibility.text = getLockScreenVisibilityText()
             }
         }

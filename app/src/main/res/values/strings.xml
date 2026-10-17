@@ -188,6 +188,11 @@
         https://github.com/FossifyOrg/Commons/tree/master/commons/src/main/res
     -->
 
+    <!-- sms-man: floating chat bubbles -->
+    <string name="bubble_notifications">Show new messages as floating bubbles</string>
+    <string name="bubbles_not_allowed">Android does not allow bubbles for this app yet.\n\nIn the next screen allow bubbles (\"All conversations\").\n\nOn Samsung also check: Settings → Notifications → Advanced settings → Floating notifications → Bubbles.\n\nBubbles work only when \"Lock screen notification visibility\" is \"Sender and message\".</string>
+    <string name="open_settings">Open settings</string>
+
     <!-- sms-man: AI spam filter -->
     <string name="spam_folder">Spam</string>
     <string name="show_spam_folder">Show the spam folder</string>

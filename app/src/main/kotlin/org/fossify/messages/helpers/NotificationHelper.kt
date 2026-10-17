@@ -8,17 +8,21 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.graphics.drawable.IconCompat
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.notificationManager
 import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.helpers.ensureBackgroundThread
+import org.fossify.commons.helpers.isRPlus
 import org.fossify.messages.R
+import org.fossify.messages.activities.BubbleThreadActivity
 import org.fossify.messages.activities.ThreadActivity
 import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.shortcutHelper
@@ -26,6 +30,8 @@ import org.fossify.messages.messaging.isShortCodeWithLetters
 import org.fossify.messages.receivers.DeleteSmsReceiver
 import org.fossify.messages.receivers.DirectReplyReceiver
 import org.fossify.messages.receivers.MarkAsReadReceiver
+
+private const val BUBBLE_HEIGHT_DP = 600
 
 class NotificationHelper(private val context: Context) {
 
@@ -171,6 +177,14 @@ class NotificationHelper(private val context: Context) {
             ).setChannelId(notificationChannelId)
         }
 
+        // sms-man: floating chat bubble. Only when the message text may be shown (bubbles need MessagingStyle)
+        if (
+            isRPlus() && context.config.bubbleNotifications &&
+            context.config.lockScreenVisibilitySetting == LOCK_SCREEN_SENDER_MESSAGE
+        ) {
+            builder.setBubbleMetadata(getBubbleMetadata(threadId, notificationId, largeIcon))
+        }
+
         var shortcut = context.shortcutHelper.getShortcut(threadId)
         if (shortcut == null) {
             ensureBackgroundThread {
@@ -244,6 +258,56 @@ class NotificationHelper(private val context: Context) {
             enableVibration(true)
             notificationManager.createNotificationChannel(this)
         }
+    }
+
+    /**
+     * sms-man: bubbles were turned off. Remove the open bubbles now: if a bubble is replaced later by a
+     * normal notification, Android removes the bubble and that new notification with it.
+     */
+    fun removeBubbles() {
+        if (!isRPlus()) return
+        notificationManager.activeNotifications
+            .filter { it.notification.flags and Notification.FLAG_BUBBLE != 0 }
+            .forEach { notificationManager.cancel(it.tag, it.id) }
+    }
+
+    // sms-man: the bubble opens BubbleThreadActivity (the conversation screen) over other apps
+    private fun getBubbleMetadata(
+        threadId: Long,
+        notificationId: Int,
+        avatar: Bitmap?
+    ): NotificationCompat.BubbleMetadata {
+        val intent = Intent(context, BubbleThreadActivity::class.java).apply {
+            putExtra(THREAD_ID, threadId)
+        }
+        // Android 12+ requires a mutable PendingIntent for bubbles
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        )
+        val icon = if (avatar != null) {
+            IconCompat.createWithAdaptiveBitmap(padForAdaptiveIcon(avatar))
+        } else {
+            IconCompat.createWithResource(context, R.mipmap.ic_launcher)
+        }
+        return NotificationCompat.BubbleMetadata.Builder(pendingIntent, icon)
+            .setDesiredHeight(BUBBLE_HEIGHT_DP)
+            .build()
+    }
+
+    /** Bubbles need an adaptive icon, which shows only the inner 72/108 part: add an empty border. */
+    private fun padForAdaptiveIcon(bitmap: Bitmap): Bitmap {
+        val size = maxOf(bitmap.width, bitmap.height) * 108 / 72
+        val padded = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        Canvas(padded).drawBitmap(
+            bitmap,
+            (size - bitmap.width) / 2f,
+            (size - bitmap.height) / 2f,
+            null
+        )
+        return padded
     }
 
     private fun getMessagesStyle(

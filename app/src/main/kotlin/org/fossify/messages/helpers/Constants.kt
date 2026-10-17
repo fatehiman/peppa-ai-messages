@@ -66,6 +66,9 @@ const val AUTO_DELETE_OLD_DAYS = "auto_delete_old_days"
 const val LAST_AUTO_DELETE_OLD = "last_auto_delete_old"
 const val DEFAULT_AUTO_DELETE_OLD_DAYS = 90
 
+// sms-man: floating chat bubbles for new messages
+const val BUBBLE_NOTIFICATIONS = "bubble_notifications"
+
 private const val PATH = "org.fossify.org.fossify.messages.action."
 const val MARK_AS_READ = PATH + "mark_as_read"
 const val REPLY = PATH + "reply"

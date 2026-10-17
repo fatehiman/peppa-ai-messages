@@ -198,6 +198,11 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getLong(LAST_AUTO_DELETE_OLD, 0L)
         set(lastAutoDeleteOld) = prefs.edit().putLong(LAST_AUTO_DELETE_OLD, lastAutoDeleteOld).apply()
 
+    /** sms-man: show new messages as floating chat bubbles (Android 11+, if Android allows bubbles). */
+    var bubbleNotifications: Boolean
+        get() = prefs.getBoolean(BUBBLE_NOTIFICATIONS, true)
+        set(bubbleNotifications) = prefs.edit().putBoolean(BUBBLE_NOTIFICATIONS, bubbleNotifications).apply()
+
     /** Senders that always go to the inbox, never to the API. "Not spam" adds the sender here. */
     val allowedNumbers: Set<String>
         get() = getKeywordList(KeywordList.ALLOWED_NUMBERS)

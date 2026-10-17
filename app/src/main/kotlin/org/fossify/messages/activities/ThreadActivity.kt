@@ -204,7 +204,10 @@ import org.greenrobot.eventbus.ThreadMode
 import org.joda.time.DateTime
 import java.io.File
 
-class ThreadActivity : SimpleActivity() {
+open class ThreadActivity : SimpleActivity() {
+    /** sms-man: true in [BubbleThreadActivity] (the conversation shown in a floating bubble). */
+    protected open val isInBubble = false
+
     private var threadId = 0L
     private var currentSIMCardIndex = 0
     private var isActivityVisible = false
@@ -287,7 +290,10 @@ class ThreadActivity : SimpleActivity() {
 
         isActivityVisible = true
 
-        notificationManager.cancel(threadId.hashCode())
+        // sms-man: in a bubble the notification must stay, otherwise Android removes the bubble
+        if (!isInBubble) {
+            notificationManager.cancel(threadId.hashCode())
+        }
 
         ensureBackgroundThread {
             val newConv = conversationsDB.getConversationWithThreadId(threadId)
@@ -1885,7 +1891,7 @@ class ThreadActivity : SimpleActivity() {
         refreshedSinceSent = true
         allMessagesFetched = false
 
-        if (isActivityVisible) {
+        if (isActivityVisible && !isInBubble) {
             notificationManager.cancel(threadId.hashCode())
         }
 

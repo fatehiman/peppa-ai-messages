@@ -261,6 +261,22 @@
 
             </RelativeLayout>
 
+            <!-- sms-man: floating chat bubbles -->
+            <RelativeLayout
+                android:id="@+id/settings_bubble_notifications_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_bubble_notifications"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bubble_notifications" />
+
+            </RelativeLayout>
+
             <include
                 android:id="@+id/settings_notifications_divider"
                 layout="@layout/divider" />
