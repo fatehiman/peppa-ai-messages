@@ -213,6 +213,19 @@
     <string name="spam_api_timeout">Wait for the API answer</string>
     <string name="spam_api_timeout_value">%d seconds (then the SMS goes to the inbox)</string>
     <string name="seconds_count">%d seconds</string>
+    <!-- sms-man: icons for numbers that are not contacts -->
+    <string name="unknown_numbers">Numbers that are not contacts</string>
+    <string name="call_log_notes_enabled">Use the call log note of a number as its icon (Samsung)</string>
+    <string name="call_log_notes_no_permission">The app needs the call log permission for this</string>
+    <string name="telegram_avatars_enabled">Show Telegram profile pictures</string>
+    <string name="telegram_api_url">Telegram API URL</string>
+    <string name="telegram_api_url_hint">https://telegram.peppasoft.com/api/v1</string>
+    <string name="telegram_api_token">Telegram API token</string>
+    <string name="telegram_prefixes">Only numbers that start with</string>
+    <string name="telegram_prefixes_hint">+989, +604</string>
+    <string name="telegram_prefixes_invalid">Enter one or more prefixes, separated by commas, for example +989</string>
+    <string name="telegram_test_ok">Works. Token: %s</string>
+    <string name="telegram_test_failed">Connection failed: %s</string>
     <string name="spam_filter_not_configured">Set the API URL and the token first.</string>
     <string name="spam_url_must_be_https">The URL must start with https://</string>
     <string name="spam_no_messages">No spam messages</string>

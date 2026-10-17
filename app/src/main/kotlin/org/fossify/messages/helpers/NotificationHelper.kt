@@ -18,7 +18,6 @@ import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.notificationManager
-import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isRPlus
 import org.fossify.messages.R
@@ -127,7 +126,7 @@ class NotificationHelper(private val context: Context) {
         }
 
         val largeIcon = bitmap ?: if (sender != null) {
-            SimpleContactsHelper(context).getContactLetterIcon(sender)
+            Avatars.getLetterIcon(context, sender, address) // sms-man
         } else {
             null
         }
@@ -225,7 +224,7 @@ class NotificationHelper(private val context: Context) {
 
         val summaryText =
             String.format(context.getString(R.string.message_sending_error), recipientName)
-        val largeIcon = SimpleContactsHelper(context).getContactLetterIcon(recipientName)
+        val largeIcon = Avatars.getLetterIcon(context, recipientName) // sms-man
         val builder = NotificationCompat.Builder(context, notificationChannelId)
             .setContentTitle(context.getString(R.string.message_not_sent_short))
             .setContentText(summaryText)

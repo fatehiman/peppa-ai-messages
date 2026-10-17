@@ -74,7 +74,7 @@ class ShortcutHelper(private val context: Context) {
                     )
                 } else {
                     IconCompat.createWithAdaptiveBitmap(
-                        contactsHelper.getContactLetterIcon(conv.title)
+                        Avatars.getLetterIcon(context, conv.title, conv.phoneNumber) // sms-man
                     )
                 }
                 setIcon(icon)

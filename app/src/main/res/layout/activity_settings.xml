@@ -554,6 +554,135 @@
                 layout="@layout/divider" />
 
             <TextView
+                android:id="@+id/settings_unknown_numbers_label"
+                style="@style/SettingsSectionLabelStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/unknown_numbers" />
+
+            <RelativeLayout
+                android:id="@+id/settings_call_log_notes_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_call_log_notes"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/call_log_notes_enabled" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_telegram_avatars_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_telegram_avatars"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/telegram_avatars_enabled" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_telegram_api_url_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_api_url_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/telegram_api_url" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_api_url"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_telegram_api_url_label" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_telegram_api_token_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_api_token_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/telegram_api_token" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_api_token"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_telegram_api_token_label" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_telegram_prefixes_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_prefixes_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/telegram_prefixes" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_prefixes"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_telegram_prefixes_label" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_telegram_test_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_test_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_test_connection" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_telegram_test"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_telegram_test_label" />
+
+            </RelativeLayout>
+
+            <include
+                android:id="@+id/settings_unknown_numbers_divider"
+                layout="@layout/divider" />
+
+            <TextView
                 android:id="@+id/settings_archived_messages_label"
                 style="@style/SettingsSectionLabelStyle"
                 android:layout_width="match_parent"

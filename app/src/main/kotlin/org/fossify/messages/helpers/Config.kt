@@ -175,6 +175,30 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(SPAM_SKIP_CODES, true)
         set(spamSkipCodes) = prefs.edit().putBoolean(SPAM_SKIP_CODES, spamSkipCodes).apply()
 
+    // sms-man: icons for numbers that are not contacts
+    /** Use the Samsung call log note ("tag") of a number as its icon letter. Needs READ_CALL_LOG. */
+    var callLogNotesEnabled: Boolean
+        get() = prefs.getBoolean(CALL_LOG_NOTES_ENABLED, false)
+        set(callLogNotesEnabled) = prefs.edit().putBoolean(CALL_LOG_NOTES_ENABLED, callLogNotesEnabled).apply()
+
+    var telegramAvatarsEnabled: Boolean
+        get() = prefs.getBoolean(TELEGRAM_AVATARS_ENABLED, false)
+        set(telegramAvatarsEnabled) = prefs.edit().putBoolean(TELEGRAM_AVATARS_ENABLED, telegramAvatarsEnabled).apply()
+
+    /** Base URL, for example https://telegram.peppasoft.com/api/v1 */
+    var telegramApiUrl: String
+        get() = prefs.getString(TELEGRAM_API_URL, "")!!
+        set(telegramApiUrl) = prefs.edit().putString(TELEGRAM_API_URL, telegramApiUrl.trim().trimEnd('/')).apply()
+
+    var telegramApiToken: String
+        get() = prefs.getString(TELEGRAM_API_TOKEN, "")!!
+        set(telegramApiToken) = prefs.edit().putString(TELEGRAM_API_TOKEN, telegramApiToken.trim()).apply()
+
+    /** Comma separated, for example "+989, +604". Only these numbers are looked up. */
+    var telegramPrefixes: String
+        get() = prefs.getString(TELEGRAM_PREFIXES, DEFAULT_TELEGRAM_PREFIXES)!!
+        set(telegramPrefixes) = prefs.edit().putString(TELEGRAM_PREFIXES, telegramPrefixes.trim()).apply()
+
     /** How long to wait for the API answer, in seconds. After that the SMS goes to the inbox. */
     var spamApiTimeoutSecs: Int
         get() = prefs.getInt(SPAM_API_TIMEOUT, DEFAULT_SPAM_API_TIMEOUT_SECS)

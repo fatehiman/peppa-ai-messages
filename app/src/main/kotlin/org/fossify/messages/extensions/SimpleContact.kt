@@ -7,9 +7,9 @@ import android.provider.ContactsContract
 import android.text.TextUtils
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
-import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.commons.models.SimpleContact
 import androidx.core.net.toUri
+import org.fossify.messages.helpers.Avatars
 
 fun ArrayList<SimpleContact>.getThreadTitle(): String {
     return TextUtils.join(", ", map { it.name }.toTypedArray()).orEmpty()
@@ -45,7 +45,7 @@ fun SimpleContact.loadIcon(context: Context): IconCompat {
         return iconCompat
     } catch (e: Exception) {
         return IconCompat.createWithAdaptiveBitmap(
-            SimpleContactsHelper(context).getContactLetterIcon(name)
+            Avatars.getBitmap(context, name, phoneNumbers.firstOrNull()?.normalizedNumber) // sms-man
         )
     }
 }

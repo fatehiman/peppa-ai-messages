@@ -21,7 +21,9 @@ import org.fossify.messages.extensions.shouldUnarchive
 import org.fossify.messages.extensions.showReceivedMessageNotification
 import org.fossify.messages.extensions.spamMessagesDB
 import org.fossify.messages.extensions.updateConversationArchivedStatus
+import org.fossify.messages.helpers.CallLogNotes
 import org.fossify.messages.helpers.SpamFilter
+import org.fossify.messages.helpers.TelegramAvatars
 import org.fossify.messages.helpers.refreshConversations
 import org.fossify.messages.helpers.refreshMessages
 import org.fossify.messages.models.Message
@@ -119,7 +121,11 @@ class SmsReceiver : BroadcastReceiver() {
         status: Int
     ) {
         val photoUri = SimpleContactsHelper(context).getPhotoUriFromPhoneNumber(address)
-        val bitmap = context.getNotificationBitmap(photoUri)
+        // sms-man: a number that is not a contact can have a downloaded Telegram picture and a call log note
+        CallLogNotes.ensureLoaded(context)
+        val avatarPath = photoUri.ifEmpty { TelegramAvatars.getCachedFile(context, address)?.absolutePath.orEmpty() }
+        val bitmap = context.getNotificationBitmap(avatarPath)
+        if (photoUri.isEmpty()) TelegramAvatars.fetchInBackground(context, address)
 
         val newMessageId = context.insertNewSMS(
             address = address,

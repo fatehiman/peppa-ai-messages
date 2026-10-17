@@ -174,6 +174,7 @@ import org.fossify.messages.helpers.PICK_SAVE_FILE_INTENT
 import org.fossify.messages.helpers.PICK_VIDEO_INTENT
 import org.fossify.messages.helpers.SEARCHED_MESSAGE_ID
 import org.fossify.messages.helpers.SpamFilter
+import org.fossify.messages.helpers.TelegramAvatars
 import org.fossify.messages.helpers.THREAD_ATTACHMENT_URI
 import org.fossify.messages.helpers.THREAD_ATTACHMENT_URIS
 import org.fossify.messages.helpers.THREAD_ID
@@ -1110,6 +1111,16 @@ open class ThreadActivity : SimpleActivity() {
         } else {
             participants.getThreadTitle()
         }
+        fetchUnknownNumberAvatar()
+    }
+
+    /** sms-man: download the Telegram picture of a number that is not a contact (background, at most once). */
+    private fun fetchUnknownNumberAvatar() {
+        if (isRecycleBin || participants.size != 1) return
+        val participant = participants.first()
+        if (participant.photoUri.isNotEmpty()) return
+        val number = participant.phoneNumbers.firstOrNull()?.normalizedNumber ?: return
+        TelegramAvatars.fetchInBackground(this, number)
     }
 
     @SuppressLint("MissingPermission")
@@ -1912,6 +1923,13 @@ open class ThreadActivity : SimpleActivity() {
                 )
             }
         }
+    }
+
+    // sms-man: a call log note or a Telegram picture changed: redraw the sender icons
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun avatarsChanged(@Suppress("unused") event: Events.AvatarsChanged) {
+        if (isDestroyed || isFinishing) return
+        binding.threadMessagesList.adapter?.notifyDataSetChanged()
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)

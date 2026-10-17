@@ -26,6 +26,7 @@ import org.fossify.messages.activities.SimpleActivity
 import org.fossify.messages.databinding.ItemConversationBinding
 import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.getAllDrafts
+import org.fossify.messages.helpers.Avatars
 import org.fossify.messages.models.Conversation
 
 @Suppress("LeakingThis")
@@ -199,10 +200,13 @@ abstract class BaseConversationsAdapter(
                 null
             }
 
-            SimpleContactsHelper(activity).loadContactImage(
-                path = conversation.photoUri,
+            // sms-man: no "+" icon for numbers that are not contacts
+            Avatars.load(
+                context = activity,
                 imageView = conversationImage,
-                placeholderName = conversation.title,
+                photoUri = conversation.photoUri,
+                name = conversation.title,
+                phoneNumber = conversation.phoneNumber.takeUnless { conversation.isGroupConversation },
                 placeholderImage = placeholder
             )
         }

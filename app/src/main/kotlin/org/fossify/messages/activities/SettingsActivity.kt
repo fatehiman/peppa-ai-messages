@@ -30,6 +30,7 @@ import org.fossify.commons.helpers.FONT_SIZE_LARGE
 import org.fossify.commons.helpers.FONT_SIZE_MEDIUM
 import org.fossify.commons.helpers.FONT_SIZE_SMALL
 import org.fossify.commons.helpers.NavigationIcon
+import org.fossify.commons.helpers.PERMISSION_READ_CALL_LOG
 import org.fossify.commons.helpers.PROTECTION_FINGERPRINT
 import org.fossify.commons.helpers.SHOW_ALL_TABS
 import org.fossify.commons.helpers.ensureBackgroundThread
@@ -48,6 +49,7 @@ import org.fossify.messages.extensions.deleteOldMessages
 import org.fossify.messages.extensions.emptyMessagesRecycleBin
 import org.fossify.messages.extensions.messagesDB
 import org.fossify.messages.extensions.notificationHelper
+import org.fossify.messages.helpers.CallLogNotes
 import org.fossify.messages.helpers.FILE_SIZE_100_KB
 import org.fossify.messages.helpers.FILE_SIZE_1_MB
 import org.fossify.messages.helpers.FILE_SIZE_200_KB
@@ -62,6 +64,7 @@ import org.fossify.messages.helpers.LOCK_SCREEN_SENDER
 import org.fossify.messages.helpers.LOCK_SCREEN_SENDER_MESSAGE
 import org.fossify.messages.helpers.MessagesImporter
 import org.fossify.messages.helpers.SpamFilter
+import org.fossify.messages.helpers.TelegramAvatars
 import org.fossify.messages.helpers.refreshConversations
 import java.util.Locale
 import kotlin.system.exitProcess
@@ -132,6 +135,7 @@ class SettingsActivity : SimpleActivity() {
         setupSendLongMessageAsMMS()
         setupGroupMessageAsMMS()
         setupSpamFilter()
+        setupUnknownNumbers()
         setupKeepConversationsArchived()
         setupAutoDeleteOld()
         setupLockScreenVisibility()
@@ -156,6 +160,7 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsOutgoingMessagesLabel,
             binding.settingsNotificationsLabel,
             binding.settingsSpamLabel,
+            binding.settingsUnknownNumbersLabel,
             binding.settingsArchivedMessagesLabel,
             binding.settingsRecycleBinLabel,
             binding.settingsOldMessagesLabel,
@@ -432,6 +437,111 @@ class SettingsActivity : SimpleActivity() {
                 is SpamFilter.Result.Error -> getString(R.string.spam_test_failed, result.message, secs)
             }
             runOnUiThread { binding.settingsSpamTest.text = text }
+        }
+    }
+
+    // sms-man: icons for numbers that are not contacts (call log notes, Telegram pictures)
+    private fun setupUnknownNumbers() = binding.apply {
+        settingsCallLogNotes.isChecked = config.callLogNotesEnabled && CallLogNotes.hasPermission(this@SettingsActivity)
+        settingsCallLogNotesHolder.setOnClickListener {
+            if (settingsCallLogNotes.isChecked) {
+                settingsCallLogNotes.isChecked = false
+                config.callLogNotesEnabled = false
+                CallLogNotes.reloadInBackground(this@SettingsActivity, force = true)
+            } else {
+                handlePermission(PERMISSION_READ_CALL_LOG) { granted ->
+                    settingsCallLogNotes.isChecked = granted
+                    config.callLogNotesEnabled = granted
+                    if (granted) {
+                        CallLogNotes.reloadInBackground(this@SettingsActivity, force = true)
+                    } else {
+                        toast(R.string.call_log_notes_no_permission)
+                    }
+                }
+            }
+        }
+
+        settingsTelegramAvatars.isChecked = config.telegramAvatarsEnabled
+        settingsTelegramAvatarsHolder.setOnClickListener {
+            settingsTelegramAvatars.toggle()
+            config.telegramAvatarsEnabled = settingsTelegramAvatars.isChecked
+            refreshConversations()
+        }
+
+        updateTelegramTexts()
+        settingsTelegramApiUrlHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.telegram_api_url,
+                value = config.telegramApiUrl,
+                hint = getString(R.string.telegram_api_url_hint),
+                isSecret = false,
+                validate = { url ->
+                    if (url.startsWith("https://", ignoreCase = true)) null
+                    else getString(R.string.spam_url_must_be_https)
+                }
+            ) {
+                if (it.trim().trimEnd('/') != config.telegramApiUrl) TelegramAvatars.clearCache(this@SettingsActivity)
+                config.telegramApiUrl = it
+                updateTelegramTexts()
+            }
+        }
+
+        settingsTelegramApiTokenHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.telegram_api_token,
+                value = config.telegramApiToken,
+                hint = getString(R.string.telegram_api_token),
+                isSecret = true,
+                validate = { null }
+            ) {
+                config.telegramApiToken = it
+                updateTelegramTexts()
+            }
+        }
+
+        settingsTelegramPrefixesHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.telegram_prefixes,
+                value = config.telegramPrefixes,
+                hint = getString(R.string.telegram_prefixes_hint),
+                isSecret = false,
+                validate = { value ->
+                    if (value.any { it.isDigit() }) null else getString(R.string.telegram_prefixes_invalid)
+                }
+            ) {
+                config.telegramPrefixes = it
+                updateTelegramTexts()
+            }
+        }
+
+        settingsTelegramTestHolder.setOnClickListener { testTelegramApi() }
+    }
+
+    private fun updateTelegramTexts() = binding.apply {
+        settingsTelegramApiUrl.text = config.telegramApiUrl.ifEmpty { getString(R.string.spam_not_set) }
+        val token = config.telegramApiToken
+        settingsTelegramApiToken.text =
+            if (token.isEmpty()) getString(R.string.spam_not_set)
+            else getString(R.string.spam_token_set, token.takeLast(4))
+        settingsTelegramPrefixes.text = config.telegramPrefixes.ifEmpty { getString(R.string.spam_not_set) }
+        settingsTelegramTest.text = ""
+        settingsTelegramTest.beGone()
+    }
+
+    private fun testTelegramApi() {
+        if (config.telegramApiUrl.isEmpty() || config.telegramApiToken.isEmpty()) {
+            toast(R.string.spam_filter_not_configured)
+            return
+        }
+        binding.settingsTelegramTest.beVisible()
+        binding.settingsTelegramTest.text = getString(R.string.spam_testing)
+        ensureBackgroundThread {
+            val (ok, message) = TelegramAvatars.test(this)
+            val text = if (ok) getString(R.string.telegram_test_ok, message) else getString(R.string.telegram_test_failed, message)
+            runOnUiThread { binding.settingsTelegramTest.text = text }
         }
     }
 
