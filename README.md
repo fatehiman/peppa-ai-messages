@@ -21,7 +21,7 @@ export / import of all messages (JSON, and the XML of "SMS Backup & Restore").
 
 | Where | What |
 | --- | --- |
-| Settings → **Spam filter (AI)** | On/off, **API endpoint URL**, **API token**, "Never check messages from my contacts" (on), "Never check messages that look like login codes" (on), **Test the connection** |
+| Settings → **Spam filter (AI)** | On/off, **API endpoint URL**, **API token**, "Never check messages from my contacts" (on), "Never check messages that look like login codes" (on), **Wait for the API answer** (8, 10, 15, 20, 25 or 30 seconds, default 15; the time also covers connecting, which can be slow on mobile data), **Test the connection** (shows the answer time, for example `answer in 1.7 s`) |
 | Settings → **Manage allowed numbers** | Numbers or sender names that always go to the inbox and are never sent to the API. `0912…` also matches `+98912…`. "Not spam" adds the sender here |
 | Settings → **Manage allowed keywords** | Words: a message that contains one always goes to the inbox, never to the API (for example `کد تایید`, a bank name) |
 | Settings → **Old messages** | **Delete old messages automatically every day** (switch) and **Delete messages older than** (days, default 90). See below |
@@ -49,7 +49,7 @@ conversations you archive by hand).
 | 4 | Blocked number that reaches the app (for example a pattern), **blocked keyword**, or "block unknown numbers" + not a contact | Spam folder, no API call |
 | 5 | Spam filter off, or no URL / token | Inbox |
 | 6 | **API**: `spam: true` | Spam folder |
-| 7 | API says not spam, error, no internet, or no answer in **8 seconds** | Inbox |
+| 7 | API says not spam, error, no internet, or no answer in time (**Wait for the API answer**, default 15 seconds) | Inbox |
 
 Spam folder = no notification, and the SMS is never written to the phone's SMS database.
 **A message is never lost because of the API.**

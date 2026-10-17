@@ -175,6 +175,12 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(SPAM_SKIP_CODES, true)
         set(spamSkipCodes) = prefs.edit().putBoolean(SPAM_SKIP_CODES, spamSkipCodes).apply()
 
+    /** How long to wait for the API answer, in seconds. After that the SMS goes to the inbox. */
+    var spamApiTimeoutSecs: Int
+        get() = prefs.getInt(SPAM_API_TIMEOUT, DEFAULT_SPAM_API_TIMEOUT_SECS)
+            .coerceIn(MIN_SPAM_API_TIMEOUT_SECS, MAX_SPAM_API_TIMEOUT_SECS)
+        set(spamApiTimeoutSecs) = prefs.edit().putInt(SPAM_API_TIMEOUT, spamApiTimeoutSecs).apply()
+
     fun getKeywordList(list: KeywordList): Set<String> = prefs.getStringSet(list.prefKey, HashSet<String>())!!
 
     fun addToKeywordList(list: KeywordList, value: String) {

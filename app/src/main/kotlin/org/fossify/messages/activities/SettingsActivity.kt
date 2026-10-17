@@ -67,6 +67,7 @@ import java.util.Locale
 import kotlin.system.exitProcess
 
 private const val MAX_AUTO_DELETE_DAYS = 36500
+private val SPAM_API_TIMEOUT_CHOICES = listOf(8, 10, 15, 20, 25, 30) // sms-man: seconds
 
 class SettingsActivity : SimpleActivity() {
     private var blockedNumbersAtPause = -1
@@ -384,6 +385,21 @@ class SettingsActivity : SimpleActivity() {
             }
         }
 
+        settingsSpamTimeoutHolder.setOnClickListener {
+            val items = SPAM_API_TIMEOUT_CHOICES.map {
+                RadioItem(it, getString(R.string.seconds_count, it))
+            }.toCollection(ArrayList())
+            RadioGroupDialog(
+                activity = this@SettingsActivity,
+                items = items,
+                checkedItemId = config.spamApiTimeoutSecs,
+                titleId = R.string.spam_api_timeout
+            ) {
+                config.spamApiTimeoutSecs = it as Int
+                updateSpamTexts()
+            }
+        }
+
         settingsSpamTestHolder.setOnClickListener { testSpamApi() }
 
     }
@@ -394,6 +410,7 @@ class SettingsActivity : SimpleActivity() {
         settingsSpamApiToken.text =
             if (token.isEmpty()) getString(R.string.spam_not_set)
             else getString(R.string.spam_token_set, token.takeLast(4))
+        settingsSpamTimeout.text = getString(R.string.spam_api_timeout_value, config.spamApiTimeoutSecs)
         settingsSpamTest.text = ""
         settingsSpamTest.beGone()
     }
@@ -406,11 +423,13 @@ class SettingsActivity : SimpleActivity() {
         binding.settingsSpamTest.beVisible()
         binding.settingsSpamTest.text = getString(R.string.spam_testing)
         ensureBackgroundThread {
+            val start = System.currentTimeMillis()
             val result = SpamFilter.check(this, "", "sms-man connection test")
+            val secs = String.format(Locale.US, "%.1f", (System.currentTimeMillis() - start) / 1000.0)
             val text = when (result) {
-                is SpamFilter.Result.Spam -> getString(R.string.spam_test_ok, "true")
-                is SpamFilter.Result.NotSpam -> getString(R.string.spam_test_ok, "false")
-                is SpamFilter.Result.Error -> getString(R.string.spam_test_failed, result.message)
+                is SpamFilter.Result.Spam -> getString(R.string.spam_test_ok, "true", secs)
+                is SpamFilter.Result.NotSpam -> getString(R.string.spam_test_ok, "false", secs)
+                is SpamFilter.Result.Error -> getString(R.string.spam_test_failed, result.message, secs)
             }
             runOnUiThread { binding.settingsSpamTest.text = text }
         }

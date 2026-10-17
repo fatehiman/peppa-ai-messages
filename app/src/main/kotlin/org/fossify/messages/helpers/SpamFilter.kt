@@ -25,11 +25,11 @@ import java.util.concurrent.TimeoutException
  * Fail-open: if the API is slow, offline or answers badly, the SMS goes to the normal inbox.
  */
 object SpamFilter {
-    private const val CONNECT_TIMEOUT_MS = 4_000
-    private const val READ_TIMEOUT_MS = 7_000
+    // Feedback calls are not urgent, they use fixed timeouts.
+    private const val FEEDBACK_TIMEOUT_MS = 15_000
 
-    // The SMS receiver must finish in about 10 s, so it never waits longer than this.
-    private const val CHECK_DEADLINE_MS = 8_000L
+    // check() waits at most config.spamApiTimeoutSecs (8-30 s, default 15). The SMS receiver runs as a
+    // background broadcast, which Android allows about 60 s, so 30 s is safe.
 
     // Phone numbers are compared by their last 10 digits (shorter ones are short codes: exact match only).
     private const val PHONE_DIGITS = 10
@@ -89,7 +89,7 @@ object SpamFilter {
      *  4. blocked number / blocked keyword /
      *     "block unknown numbers" + not a contact        -> spam folder
      *  5. spam filter off or not set up                  -> inbox
-     *  6. the API: spam -> spam folder; not spam, error, timeout (8 s), no internet -> inbox
+     *  6. the API: spam -> spam folder; not spam, error, timeout (setting, 8-30 s), no internet -> inbox
      * Numbers in Android's system block list never get here: Android drops those SMS itself.
      */
     fun decide(context: Context, address: String, body: String): Decision {
@@ -124,19 +124,22 @@ object SpamFilter {
         }
     }
 
-    /** Blocking; waits at most [CHECK_DEADLINE_MS]. Call it from a background thread. */
+    /** Blocking; waits at most the "API wait time" setting. Call it from a background thread. */
     fun check(context: Context, address: String, body: String): Result {
         val config = context.config
+        val timeoutSecs = config.spamApiTimeoutSecs
+        val timeoutMs = timeoutSecs * 1000
         val json = JSONObject().put("sender", address).put("body", body)
         val future = executor.submit<Result> {
-            val (code, text) = post(config.spamApiUrl, config.spamApiToken, json)
+            // connecting (DNS + TLS) can be slow on mobile data, so it gets the whole time too
+            val (code, text) = post(config.spamApiUrl, config.spamApiToken, json, timeoutMs, timeoutMs)
             parseCheck(code, text)
         }
         return try {
-            future.get(CHECK_DEADLINE_MS, TimeUnit.MILLISECONDS)
+            future.get(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
         } catch (_: TimeoutException) {
             future.cancel(true)
-            Result.Error("timeout")
+            Result.Error("no answer in $timeoutSecs s")
         } catch (e: Exception) {
             Result.Error(e.cause?.message ?: e.message ?: e.javaClass.simpleName)
         }
@@ -151,7 +154,7 @@ object SpamFilter {
         if (config.spamApiUrl.isEmpty() || config.spamApiToken.isEmpty()) return "not configured"
         return try {
             val json = JSONObject().put("sender", address).put("body", body).put("spam", spam)
-            val (code, text) = post(feedbackUrl(config.spamApiUrl), config.spamApiToken, json)
+            val (code, text) = post(feedbackUrl(config.spamApiUrl), config.spamApiToken, json, FEEDBACK_TIMEOUT_MS, FEEDBACK_TIMEOUT_MS)
             if (code in 200..299) null else errorText(code, text)
         } catch (e: Exception) {
             e.message ?: e.javaClass.simpleName
@@ -186,12 +189,12 @@ object SpamFilter {
         return "HTTP $code" + if (desc.isNotEmpty()) ": $desc" else ""
     }
 
-    private fun post(url: String, token: String, json: JSONObject): Pair<Int, String> {
+    private fun post(url: String, token: String, json: JSONObject, connectTimeoutMs: Int, readTimeoutMs: Int): Pair<Int, String> {
         val conn = URL(url).openConnection() as HttpURLConnection
         try {
             conn.requestMethod = "POST"
-            conn.connectTimeout = CONNECT_TIMEOUT_MS
-            conn.readTimeout = READ_TIMEOUT_MS
+            conn.connectTimeout = connectTimeoutMs
+            conn.readTimeout = readTimeoutMs
             conn.doOutput = true
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             conn.setRequestProperty("Accept", "application/json")

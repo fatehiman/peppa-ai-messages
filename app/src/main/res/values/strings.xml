@@ -208,8 +208,11 @@
     <string name="spam_skip_codes">Never check messages that look like login codes</string>
     <string name="spam_test_connection">Test the connection</string>
     <string name="spam_testing">Testing…</string>
-    <string name="spam_test_ok">Works. A test message got: spam = %1$s</string>
-    <string name="spam_test_failed">Connection failed: %s</string>
+    <string name="spam_test_ok">Works. A test message got: spam = %1$s (answer in %2$s s)</string>
+    <string name="spam_test_failed">Connection failed after %2$s s: %1$s</string>
+    <string name="spam_api_timeout">Wait for the API answer</string>
+    <string name="spam_api_timeout_value">%d seconds (then the SMS goes to the inbox)</string>
+    <string name="seconds_count">%d seconds</string>
     <string name="spam_filter_not_configured">Set the API URL and the token first.</string>
     <string name="spam_url_must_be_https">The URL must start with https://</string>
     <string name="spam_no_messages">No spam messages</string>

@@ -504,6 +504,29 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/settings_spam_timeout_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_timeout_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/spam_api_timeout" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_spam_timeout"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_spam_timeout_label"
+                    tools:text="15 seconds" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:id="@+id/settings_spam_test_holder"
                 style="@style/SettingsHolderTextViewStyle"
                 android:layout_width="match_parent"
