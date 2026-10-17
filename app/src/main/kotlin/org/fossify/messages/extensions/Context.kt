@@ -831,6 +831,7 @@ fun Context.insertNewSMS(
     threadId: Long,
     type: Int,
     subscriptionId: Int,
+    dateSent: Long = 0L, // sms-man: when the sender sent it (SMS center time), 0 = unknown
 ): Long {
     val uri = Sms.CONTENT_URI
     val contentValues = ContentValues().apply {
@@ -838,6 +839,7 @@ fun Context.insertNewSMS(
         put(Sms.SUBJECT, subject)
         put(Sms.BODY, body)
         put(Sms.DATE, date)
+        if (dateSent > 0L) put(Sms.DATE_SENT, dateSent)
         put(Sms.READ, read)
         put(Sms.THREAD_ID, threadId)
         put(Sms.TYPE, type)

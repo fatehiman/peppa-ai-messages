@@ -46,6 +46,7 @@ class SmsReceiver : BroadcastReceiver() {
                 val body = buildString { parts.forEach { append(it.messageBody.orEmpty()) } }
 
                 val date = System.currentTimeMillis()
+                val dateSent = parts.first().timestampMillis // sms-man: real send time, shown in Properties
                 val subscriptionId = intent.getIntExtra("subscription", -1)
 
                 // sms-man: blocked numbers / keywords and spam go only to the app's own spam folder (no system DB
@@ -66,6 +67,7 @@ class SmsReceiver : BroadcastReceiver() {
                     subject = subject,
                     body = body,
                     date = date,
+                    dateSent = dateSent,
                     threadId = threadId,
                     subscriptionId = subscriptionId,
                     status = status
@@ -109,6 +111,7 @@ class SmsReceiver : BroadcastReceiver() {
         subject: String,
         body: String,
         date: Long,
+        dateSent: Long,
         read: Int = 0,
         threadId: Long,
         type: Int = Telephony.Sms.MESSAGE_TYPE_INBOX,
@@ -126,7 +129,8 @@ class SmsReceiver : BroadcastReceiver() {
             read = read,
             threadId = threadId,
             type = type,
-            subscriptionId = subscriptionId
+            subscriptionId = subscriptionId,
+            dateSent = dateSent
         )
 
         context.getConversations(threadId).firstOrNull()?.let { conv ->

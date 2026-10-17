@@ -125,6 +125,7 @@ import org.fossify.messages.extensions.dialNumber
 import org.fossify.messages.extensions.emptyMessagesRecycleBinForConversation
 import org.fossify.messages.extensions.filterNotInByKey
 import org.fossify.messages.extensions.getAddresses
+import org.fossify.messages.extensions.getContactFromAddress
 import org.fossify.messages.extensions.getDefaultKeyboardHeight
 import org.fossify.messages.extensions.getFileSizeFromUri
 import org.fossify.messages.extensions.getMessages
@@ -150,6 +151,7 @@ import org.fossify.messages.extensions.restoreMessageFromRecycleBin
 import org.fossify.messages.extensions.saveSmsDraft
 import org.fossify.messages.extensions.shouldUnarchive
 import org.fossify.messages.extensions.showWithAnimation
+import org.fossify.messages.extensions.startContactDetailsIntent
 import org.fossify.messages.extensions.subscriptionManagerCompat
 import org.fossify.messages.extensions.toArrayList
 import org.fossify.messages.extensions.toSortedMessages
@@ -394,6 +396,33 @@ open class ThreadActivity : SimpleActivity() {
         binding.threadToolbar.setOnMenuItemClickListener { menuItem ->
             if (participants.isEmpty()) return@setOnMenuItemClickListener true
             return@setOnMenuItemClickListener handleMenuItemAction(menuItem)
+        }
+        // sms-man: tapping the title (contact name) opens the contact in the phone's contacts app
+        binding.threadToolbar.setOnClickListener { openTitleContact() }
+    }
+
+    /**
+     * sms-man: one person: a saved contact opens in the contacts app, an unknown number opens "add to contacts".
+     * A group opens the conversation details screen.
+     */
+    private fun openTitleContact() {
+        if (participants.isEmpty() || isRecycleBin) return
+        if (participants.size > 1) {
+            if (conversation != null) launchConversationDetails(threadId)
+            return
+        }
+
+        val phoneNumber = participants.first().phoneNumbers.firstOrNull()?.normalizedNumber ?: return
+        if (isSpecialNumber()) return
+        getContactFromAddress(phoneNumber) { contact ->
+            runOnUiThread {
+                if (isDestroyed || isFinishing) return@runOnUiThread
+                if (contact != null) {
+                    startContactDetailsIntent(contact)
+                } else {
+                    addNumberToContact()
+                }
+            }
         }
     }
 
@@ -1403,11 +1432,14 @@ open class ThreadActivity : SimpleActivity() {
                 conversationsDB.markRead(threadId)
             }
 
-            if (i == cnt - 1 && (message.type == Telephony.Sms.MESSAGE_TYPE_SENT)) {
+            // sms-man: the last sent message shows a tick (or double tick), and every other delivered sent message
+            // shows the double tick too
+            val isDelivered = message.status == Telephony.Sms.STATUS_COMPLETE
+            if (message.type == Telephony.Sms.MESSAGE_TYPE_SENT && (i == cnt - 1 || isDelivered)) {
                 items.add(
                     ThreadSent(
                         messageId = message.id,
-                        delivered = message.status == Telephony.Sms.STATUS_COMPLETE
+                        delivered = isDelivered
                     )
                 )
             }
