@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
+    // sms-man: removes Fossify's "fake version of the app" dialog from the library (see build-logic)
+    id("peppa.no-fake-version-warning")
 }
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")

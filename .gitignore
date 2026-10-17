@@ -14,3 +14,4 @@ fastlane/report.xml
 
 # sms-man: built APKs for installing
 /release/
+/build-logic/build/
