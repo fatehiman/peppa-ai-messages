@@ -67,6 +67,7 @@ import org.fossify.messages.helpers.CallLogNotes
 import org.fossify.messages.helpers.SEARCHED_MESSAGE_ID
 import org.fossify.messages.helpers.THREAD_ID
 import org.fossify.messages.helpers.THREAD_TITLE
+import org.fossify.messages.helpers.TelegramAvatars
 import org.fossify.messages.models.Conversation
 import org.fossify.messages.models.Events
 import org.fossify.messages.models.Message
@@ -109,6 +110,7 @@ class MainActivity : SimpleActivity() {
     override fun onResume() {
         super.onResume()
         CallLogNotes.reloadInBackground(this) // sms-man: notes may have changed in the Phone app
+        TelegramAvatars.cleanupIfNeeded(this) // sms-man: once a day, delete pictures not seen for 90 days
         updateMenuColors()
         refreshMenuItems()
 
@@ -139,6 +141,8 @@ class MainActivity : SimpleActivity() {
     override fun onPause() {
         super.onPause()
         storeStateVariables()
+        val appContext = applicationContext
+        ensureBackgroundThread { TelegramAvatars.flushSeen(appContext) } // sms-man: save "seen" times
     }
 
     override fun onDestroy() {

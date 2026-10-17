@@ -468,6 +468,13 @@ class SettingsActivity : SimpleActivity() {
             refreshConversations()
         }
 
+        settingsTelegramAvatarsContacts.isChecked = config.telegramAvatarsContacts
+        settingsTelegramAvatarsContactsHolder.setOnClickListener {
+            settingsTelegramAvatarsContacts.toggle()
+            config.telegramAvatarsContacts = settingsTelegramAvatarsContacts.isChecked
+            refreshConversations()
+        }
+
         updateTelegramTexts()
         settingsTelegramApiUrlHolder.setOnClickListener {
             SpamSettingDialog(

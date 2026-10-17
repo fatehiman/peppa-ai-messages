@@ -591,6 +591,21 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/settings_telegram_avatars_contacts_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_telegram_avatars_contacts"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/telegram_avatars_contacts" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:id="@+id/settings_telegram_api_url_holder"
                 style="@style/SettingsHolderTextViewStyle"
                 android:layout_width="match_parent"

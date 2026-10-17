@@ -159,6 +159,7 @@ import org.fossify.messages.extensions.updateConversationArchivedStatus
 import org.fossify.messages.extensions.updateLastConversationMessage
 import org.fossify.messages.extensions.updateScheduledMessagesThreadId
 import org.fossify.messages.helpers.AudioPlayerManager
+import org.fossify.messages.helpers.Avatars
 import org.fossify.messages.helpers.CAPTURE_AUDIO_INTENT
 import org.fossify.messages.helpers.CAPTURE_PHOTO_INTENT
 import org.fossify.messages.helpers.CAPTURE_VIDEO_INTENT
@@ -1114,13 +1115,14 @@ open class ThreadActivity : SimpleActivity() {
         fetchUnknownNumberAvatar()
     }
 
-    /** sms-man: download the Telegram picture of a number that is not a contact (background, at most once). */
+    /** sms-man: download the Telegram picture of a number without a contact photo (background, at most once). */
     private fun fetchUnknownNumberAvatar() {
         if (isRecycleBin || participants.size != 1) return
         val participant = participants.first()
         if (participant.photoUri.isNotEmpty()) return
         val number = participant.phoneNumbers.firstOrNull()?.normalizedNumber ?: return
-        TelegramAvatars.fetchInBackground(this, number)
+        val isContact = participant.name != number && !Avatars.isPhoneLike(participant.name)
+        TelegramAvatars.fetchInBackground(this, number, isContact)
     }
 
     @SuppressLint("MissingPermission")

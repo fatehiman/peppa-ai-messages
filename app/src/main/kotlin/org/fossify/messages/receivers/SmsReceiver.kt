@@ -121,11 +121,14 @@ class SmsReceiver : BroadcastReceiver() {
         status: Int
     ) {
         val photoUri = SimpleContactsHelper(context).getPhotoUriFromPhoneNumber(address)
-        // sms-man: a number that is not a contact can have a downloaded Telegram picture and a call log note
+        // sms-man: a number without a contact photo can have a downloaded Telegram picture and a call log note
         CallLogNotes.ensureLoaded(context)
-        val avatarPath = photoUri.ifEmpty { TelegramAvatars.getCachedFile(context, address)?.absolutePath.orEmpty() }
+        val isContact = SimpleContactsHelper(context).getNameFromPhoneNumber(address) != address
+        val avatarPath = photoUri.ifEmpty {
+            TelegramAvatars.getCachedFile(context, address, isContact)?.absolutePath.orEmpty()
+        }
         val bitmap = context.getNotificationBitmap(avatarPath)
-        if (photoUri.isEmpty()) TelegramAvatars.fetchInBackground(context, address)
+        if (photoUri.isEmpty()) TelegramAvatars.fetchInBackground(context, address, isContact)
 
         val newMessageId = context.insertNewSMS(
             address = address,

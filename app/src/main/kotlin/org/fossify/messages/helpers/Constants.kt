@@ -63,6 +63,8 @@ const val DEFAULT_SPAM_API_TIMEOUT_SECS = 15
 // sms-man: icons for numbers that are not contacts
 const val CALL_LOG_NOTES_ENABLED = "call_log_notes_enabled"
 const val TELEGRAM_AVATARS_ENABLED = "telegram_avatars_enabled"
+const val TELEGRAM_AVATARS_CONTACTS = "telegram_avatars_contacts"
+const val LAST_TELEGRAM_AVATARS_CLEANUP = "last_telegram_avatars_cleanup"
 const val TELEGRAM_API_URL = "telegram_api_url"
 const val TELEGRAM_API_TOKEN = "telegram_api_token"
 const val TELEGRAM_PREFIXES = "telegram_prefixes"

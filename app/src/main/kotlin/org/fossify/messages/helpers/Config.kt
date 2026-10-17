@@ -185,6 +185,15 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(TELEGRAM_AVATARS_ENABLED, false)
         set(telegramAvatarsEnabled) = prefs.edit().putBoolean(TELEGRAM_AVATARS_ENABLED, telegramAvatarsEnabled).apply()
 
+    /** Telegram pictures also for saved contacts that have no photo. */
+    var telegramAvatarsContacts: Boolean
+        get() = prefs.getBoolean(TELEGRAM_AVATARS_CONTACTS, false)
+        set(telegramAvatarsContacts) = prefs.edit().putBoolean(TELEGRAM_AVATARS_CONTACTS, telegramAvatarsContacts).apply()
+
+    var lastTelegramAvatarsCleanup: Long
+        get() = prefs.getLong(LAST_TELEGRAM_AVATARS_CLEANUP, 0L)
+        set(lastTelegramAvatarsCleanup) = prefs.edit().putLong(LAST_TELEGRAM_AVATARS_CLEANUP, lastTelegramAvatarsCleanup).apply()
+
     /** Base URL, for example https://telegram.peppasoft.com/api/v1 */
     var telegramApiUrl: String
         get() = prefs.getString(TELEGRAM_API_URL, "")!!

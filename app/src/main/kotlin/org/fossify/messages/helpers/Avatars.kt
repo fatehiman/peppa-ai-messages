@@ -87,6 +87,7 @@ object Avatars {
     /**
      * Replaces SimpleContactsHelper.loadContactImage: [photoUri] (contact photo), else the Telegram picture,
      * else the letter icon. A [placeholderImage] (group icon) disables the Telegram picture.
+     * [name] that is not a number = a saved contact (Telegram picture only if that setting is on).
      */
     fun load(
         context: Context,
@@ -99,8 +100,8 @@ object Avatars {
         val placeholder = placeholderImage ?: getLetterIcon(context, name, phoneNumber).toDrawable(context.resources)
         var model: Any? = photoUri.ifEmpty { null }
         var signature: ObjectKey? = null
-        if (model == null && placeholderImage == null && isPhoneLike(name)) {
-            TelegramAvatars.getCachedFile(context, phoneNumber?.ifBlank { null } ?: name)?.let {
+        if (model == null && placeholderImage == null) {
+            getTelegramFile(context, name, phoneNumber)?.let {
                 model = it
                 signature = ObjectKey(it.lastModified()) // a new download must not show the old picture
             }
@@ -123,14 +124,19 @@ object Avatars {
 
     /** For notifications and shortcuts (no ImageView). Call it from a background thread. */
     fun getBitmap(context: Context, name: String, phoneNumber: String?): Bitmap {
-        if (isPhoneLike(name)) {
-            TelegramAvatars.getCachedFile(context, phoneNumber?.ifBlank { null } ?: name)?.let { file ->
-                try {
-                    BitmapFactory.decodeFile(file.absolutePath)?.let { return it }
-                } catch (_: Exception) {
-                }
+        getTelegramFile(context, name, phoneNumber)?.let { file ->
+            try {
+                BitmapFactory.decodeFile(file.absolutePath)?.let { return it }
+            } catch (_: Exception) {
             }
         }
         return getLetterIcon(context, name, phoneNumber)
+    }
+
+    /** The Telegram picture for a non-contact ([name] is the number) or a contact (needs [phoneNumber]). */
+    fun getTelegramFile(context: Context, name: String, phoneNumber: String?): java.io.File? {
+        val isContact = !isPhoneLike(name)
+        val number = phoneNumber?.ifBlank { null } ?: if (isContact) return null else name
+        return TelegramAvatars.getCachedFile(context, number, isContact)
     }
 }
