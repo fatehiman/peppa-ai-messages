@@ -27,7 +27,7 @@ export / import of all messages (JSON, and the XML of "SMS Backup & Restore").
 | Settings → **Old messages** | **Delete old messages automatically every day** (switch) and **Delete messages older than** (days, default 90). See below |
 | Main menu → **Show the spam folder** | List of caught messages (sender, date, SIM 1/2, reason, e.g. `AI: 92%`, `Blocked keyword: …`). Tap one: read it, **Not spam** (moves it to the inbox, adds the sender to allowed numbers and tells the server) or **Delete**. Menu: **Delete all spam** |
 | Conversation menu → **Report as spam** | Moves the received messages of the conversation into the spam folder, deletes the conversation, and tells the server the sender is a spammer |
-| App | New name and icon ([reference-docs/graphics/icon.png](reference-docs/graphics/icon.png)); Fossify's "fake version" warning is off |
+| App | New name and icon ([reference-docs/graphics/icon.png](reference-docs/graphics/icon.png)). Fossify's "You are using a fake version of the app" warning is removed: `MainActivity` no longer calls `checkAppSideloading()`, and `App.onCreate` marks the app as not sideloaded for the splash screen |
 
 The spam folder is separate from Fossify's **Archived conversations** (that folder is only for
 conversations you archive by hand).

@@ -21,7 +21,6 @@ import org.fossify.commons.extensions.beGone
 import org.fossify.commons.extensions.beGoneIf
 import org.fossify.commons.extensions.beVisible
 import org.fossify.commons.extensions.beVisibleIf
-import org.fossify.commons.extensions.checkAppSideloading
 import org.fossify.commons.extensions.checkWhatsNew
 import org.fossify.commons.extensions.convertToBitmap
 import org.fossify.commons.extensions.fadeIn
@@ -103,9 +102,7 @@ class MainActivity : SimpleActivity() {
             loadMessages()
         }
 
-        if (checkAppSideloading()) {
-            return
-        }
+        // sms-man: no Fossify "fake version of the app" check: this is an own fork with its own app id
     }
 
     override fun onResume() {
