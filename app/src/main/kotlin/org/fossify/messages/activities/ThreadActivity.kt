@@ -214,6 +214,7 @@ open class ThreadActivity : SimpleActivity() {
 
     private var threadId = 0L
     private var currentSIMCardIndex = 0
+    @Volatile // sms-man: also read on background threads
     private var isActivityVisible = false
     private var refreshedSinceSent = false
     private var threadItems: List<ThreadItem> = emptyList()
@@ -296,6 +297,7 @@ open class ThreadActivity : SimpleActivity() {
 
         // sms-man: in a bubble the notification must stay, otherwise Android removes the bubble
         if (!isInBubble) {
+            openThreadId = threadId
             notificationManager.cancel(threadId.hashCode())
         }
 
@@ -329,6 +331,7 @@ open class ThreadActivity : SimpleActivity() {
         saveDraftMessage()
         bus?.post(Events.RefreshConversations())
         isActivityVisible = false
+        if (!isInBubble && openThreadId == threadId) openThreadId = 0L
     }
 
     override fun onStop() {
@@ -1439,7 +1442,9 @@ open class ThreadActivity : SimpleActivity() {
                 items.add(ThreadSending(message.id))
             }
 
-            if (!message.read) {
+            // sms-man: only while the user sees the screen. A thread screen left in the background (Home pressed) also
+            // gets new messages: Fossify marked them read there, so the app showed nothing unread under a notification
+            if (!message.read && isActivityVisible) {
                 hadUnreadItems = true
                 markMessageRead(message.id, message.isMMS)
                 conversationsDB.markRead(threadId)
@@ -2281,6 +2286,12 @@ open class ThreadActivity : SimpleActivity() {
     }
 
     companion object {
+        /**
+         * sms-man: the thread shown on screen now (not in a bubble), 0 = none. Read and written only on the
+         * main thread. A new message for this thread is marked read and gets no notification.
+         */
+        var openThreadId = 0L
+
         private const val TYPE_EDIT = 14
         private const val TYPE_SEND = 15
         private const val TYPE_DELETE = 16

@@ -63,6 +63,7 @@ import org.fossify.messages.extensions.getConversations
 import org.fossify.messages.extensions.getMessages
 import org.fossify.messages.extensions.insertOrUpdateConversation
 import org.fossify.messages.extensions.messagesDB
+import org.fossify.messages.extensions.notificationHelper
 import org.fossify.messages.helpers.CallLogNotes
 import org.fossify.messages.helpers.SEARCHED_MESSAGE_ID
 import org.fossify.messages.helpers.THREAD_ID
@@ -111,6 +112,7 @@ class MainActivity : SimpleActivity() {
         super.onResume()
         CallLogNotes.reloadInBackground(this) // sms-man: notes may have changed in the Phone app
         TelegramAvatars.cleanupIfNeeded(this) // sms-man: once a day, delete pictures not seen for 90 days
+        ensureBackgroundThread { notificationHelper.removeNotificationsOfReadThreads() } // sms-man: wrong badge
         updateMenuColors()
         refreshMenuItems()
 

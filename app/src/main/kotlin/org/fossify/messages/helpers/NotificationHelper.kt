@@ -12,6 +12,7 @@ import android.graphics.Canvas
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.RingtoneManager
+import android.provider.Telephony
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
@@ -268,6 +269,43 @@ class NotificationHelper(private val context: Context) {
         notificationManager.activeNotifications
             .filter { it.notification.flags and Notification.FLAG_BUBBLE != 0 }
             .forEach { notificationManager.cancel(it.tag, it.id) }
+    }
+
+    /**
+     * sms-man: remove the message notifications of threads that have no unread message any more (read in the
+     * app, on another device, by another app...). Samsung shows these notifications as the app icon badge, so a
+     * leftover one looks like an unread message that does not exist. Bubbles stay (closing one removes the bubble).
+     * Call it on a background thread.
+     */
+    fun removeNotificationsOfReadThreads() {
+        val active = notificationManager.activeNotifications.filter {
+            val threadId = it.notification.shortcutId?.toLongOrNull() ?: return@filter false
+            it.id == threadId.hashCode() && it.notification.flags and Notification.FLAG_BUBBLE == 0
+        }
+        if (active.isEmpty()) return
+
+        val unreadThreadIds = try {
+            getUnreadThreadIds()
+        } catch (_: Exception) {
+            return
+        }
+        active.filter { it.notification.shortcutId!!.toLong() !in unreadThreadIds }
+            .forEach { notificationManager.cancel(it.tag, it.id) }
+    }
+
+    private fun getUnreadThreadIds(): Set<Long> {
+        val ids = HashSet<Long>()
+        val sms = Telephony.Sms.CONTENT_URI to
+            "${Telephony.Sms.READ}=0 AND ${Telephony.Sms.TYPE}=${Telephony.Sms.MESSAGE_TYPE_INBOX}"
+        val mms = Telephony.Mms.CONTENT_URI to
+            "${Telephony.Mms.READ}=0 AND ${Telephony.Mms.MESSAGE_BOX}=${Telephony.Mms.MESSAGE_BOX_INBOX}"
+        listOf(sms, mms).forEach { (uri, selection) ->
+            // Sms.THREAD_ID and Mms.THREAD_ID are both "thread_id"
+            context.contentResolver.query(uri, arrayOf(Telephony.Sms.THREAD_ID), selection, null, null)?.use { cursor ->
+                while (cursor.moveToNext()) ids.add(cursor.getLong(0))
+            }
+        }
+        return ids
     }
 
     // sms-man: the bubble opens BubbleThreadActivity (the conversation screen) over other apps

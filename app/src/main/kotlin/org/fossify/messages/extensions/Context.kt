@@ -50,6 +50,7 @@ import org.fossify.commons.helpers.isQPlus
 import org.fossify.commons.models.PhoneNumber
 import org.fossify.commons.models.SimpleContact
 import org.fossify.messages.R
+import org.fossify.messages.activities.ThreadActivity
 import org.fossify.messages.databases.MessagesDatabase
 import org.fossify.messages.helpers.AttachmentUtils.parseAttachmentNames
 import org.fossify.messages.helpers.Config
@@ -60,6 +61,8 @@ import org.fossify.messages.helpers.MessagingCache
 import org.fossify.messages.helpers.NotificationHelper
 import org.fossify.messages.helpers.ShortcutHelper
 import org.fossify.messages.helpers.generateRandomId
+import org.fossify.messages.helpers.refreshConversations
+import org.fossify.messages.helpers.refreshMessages
 import org.fossify.messages.interfaces.AttachmentsDao
 import org.fossify.messages.interfaces.ConversationsDao
 import org.fossify.messages.interfaces.DraftsDao
@@ -1075,6 +1078,18 @@ fun Context.showReceivedMessageNotification(
     bitmap: Bitmap?,
 ) {
     Handler(Looper.getMainLooper()).post {
+        // sms-man: the conversation is open on screen: the user sees the message, so it is read and needs no
+        // notification. Checked on the main thread, so it can not race with ThreadActivity.onResume/onPause.
+        if (threadId == ThreadActivity.openThreadId) {
+            ensureBackgroundThread {
+                markMessageRead(messageId, isMms)
+                conversationsDB.markRead(threadId)
+                refreshMessages()
+                refreshConversations()
+            }
+            return@post
+        }
+
         notificationHelper.showMessageNotification(
             messageId = messageId,
             isMms = isMms,

@@ -19,6 +19,7 @@ import org.fossify.messages.extensions.deleteConversation
 import org.fossify.messages.extensions.dialNumber
 import org.fossify.messages.extensions.launchConversationDetails
 import org.fossify.messages.extensions.markThreadMessagesRead
+import org.fossify.messages.extensions.notificationHelper
 import org.fossify.messages.extensions.markThreadMessagesUnread
 import org.fossify.messages.extensions.renameConversation
 import org.fossify.messages.extensions.updateConversationArchivedStatus
@@ -247,6 +248,7 @@ class ConversationsAdapter(
             conversationsMarkedAsRead.filter { conversation -> !conversation.read }.forEach {
                 activity.markThreadMessagesRead(it.threadId)
             }
+            activity.notificationHelper.removeNotificationsOfReadThreads() // sms-man: no leftover notification
 
             refreshConversationsAndFinishActMode()
         }
