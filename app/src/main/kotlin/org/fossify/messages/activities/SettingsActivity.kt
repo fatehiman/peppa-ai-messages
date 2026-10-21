@@ -128,6 +128,7 @@ class SettingsActivity : SimpleActivity() {
         setupManageAllowedLists()
         setupChangeDateTimeFormat()
         setupFontSize()
+        setupPinchTextSize()
         setupShowCharacterCounter()
         setupUseSimpleCharacters()
         setupSendOnEnter()
@@ -286,7 +287,19 @@ class SettingsActivity : SimpleActivity() {
             RadioGroupDialog(this@SettingsActivity, items, config.fontSize) {
                 config.fontSize = it as Int
                 settingsFontSize.text = getFontSizeText()
+                // sms-man: a new font size also undoes the sizes set with two fingers
+                config.threadTextScale = 1f
+                config.conversationsTextScale = 1f
             }
+        }
+    }
+
+    // sms-man
+    private fun setupPinchTextSize() = binding.apply {
+        settingsPinchTextSize.isChecked = config.pinchTextSize
+        settingsPinchTextSizeHolder.setOnClickListener {
+            settingsPinchTextSize.toggle()
+            config.pinchTextSize = settingsPinchTextSize.isChecked
         }
     }
 

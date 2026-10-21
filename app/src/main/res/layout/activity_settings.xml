@@ -212,6 +212,22 @@
 
             </RelativeLayout>
 
+            <!-- sms-man: change the text size with two fingers -->
+            <RelativeLayout
+                android:id="@+id/settings_pinch_text_size_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_pinch_text_size"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pinch_text_size" />
+
+            </RelativeLayout>
+
             <include
                 android:id="@+id/settings_general_settings_divider"
                 layout="@layout/divider" />

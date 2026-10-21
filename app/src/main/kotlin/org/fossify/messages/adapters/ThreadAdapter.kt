@@ -73,6 +73,7 @@ import org.fossify.messages.extensions.startContactDetailsIntent
 import org.fossify.messages.extensions.subscriptionManagerCompat
 import org.fossify.messages.helpers.Avatars
 import org.fossify.messages.helpers.EXTRA_VCARD_URI
+import org.fossify.messages.helpers.PinchTextSize
 import org.fossify.messages.helpers.THREAD_DATE_TIME
 import org.fossify.messages.helpers.THREAD_RECEIVED_MESSAGE
 import org.fossify.messages.helpers.THREAD_SENT_MESSAGE
@@ -99,7 +100,7 @@ class ThreadAdapter(
     val isRecycleBin: Boolean,
     val deleteMessages: (messages: List<Message>, toRecycleBin: Boolean, fromRecycleBin: Boolean) -> Unit
 ) : MyRecyclerViewListAdapter<ThreadItem>(activity, recyclerView, ThreadItemDiffCallback(), itemClick) {
-    private var fontSize = activity.getTextSize()
+    private var fontSize = activity.getTextSize() * activity.config.threadTextScale
 
     @SuppressLint("MissingPermission")
     private val hasMultipleSIMCards = (activity.subscriptionManagerCompat().activeSubscriptionInfoList?.size ?: 0) > 1
@@ -115,6 +116,11 @@ class ThreadAdapter(
         setupDragListener(true)
         setHasStableIds(true)
         (recyclerView.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
+        // sms-man: change the text size with two fingers
+        PinchTextSize.setup(recyclerView, activity.config::threadTextScale) { scale ->
+            fontSize = activity.getTextSize() * scale
+            notifyItemRangeChanged(0, itemCount, PinchTextSize.Payload)
+        }
     }
 
     override fun getActionMenuId() = R.menu.cab_thread
@@ -182,6 +188,24 @@ class ThreadAdapter(
         }
 
         return ThreadViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        when {
+            PinchTextSize.isOnlyTextSize(payloads) -> updateTextSize((holder as ThreadViewHolder).binding)
+            PinchTextSize.Payload in payloads -> onBindViewHolder(holder, position)
+            else -> super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
+    // sms-man: the same sizes as the setup* functions below
+    private fun updateTextSize(binding: ViewBinding) {
+        when (binding) {
+            is ItemMessageBinding -> binding.threadMessageBody.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize)
+            is ItemThreadDateTimeBinding -> binding.threadDateTime.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize)
+            is ItemThreadErrorBinding -> binding.threadError.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize - 4)
+            is ItemThreadSendingBinding -> binding.threadSending.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize)
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

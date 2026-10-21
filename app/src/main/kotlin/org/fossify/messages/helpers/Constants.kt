@@ -82,6 +82,11 @@ const val DEFAULT_AUTO_DELETE_OLD_DAYS = 90
 // sms-man: floating chat bubbles for new messages
 const val BUBBLE_NOTIFICATIONS = "bubble_notifications"
 
+// sms-man: change the text size with two fingers
+const val PINCH_TEXT_SIZE = "pinch_text_size"
+const val THREAD_TEXT_SCALE = "thread_text_scale"
+const val CONVERSATIONS_TEXT_SCALE = "conversations_text_scale"
+
 private const val PATH = "org.fossify.org.fossify.messages.action."
 const val MARK_AS_READ = PATH + "mark_as_read"
 const val REPLY = PATH + "reply"

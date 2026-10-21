@@ -27,6 +27,7 @@ import org.fossify.messages.databinding.ItemConversationBinding
 import org.fossify.messages.extensions.config
 import org.fossify.messages.extensions.getAllDrafts
 import org.fossify.messages.helpers.Avatars
+import org.fossify.messages.helpers.PinchTextSize
 import org.fossify.messages.models.Conversation
 
 @Suppress("LeakingThis")
@@ -43,7 +44,7 @@ abstract class BaseConversationsAdapter(
     onRefresh = onRefresh
 ),
     RecyclerViewFastScroller.OnPopupTextUpdate {
-    private var fontSize = activity.getTextSize()
+    private var fontSize = activity.getTextSize() * activity.config.conversationsTextScale
     private var drafts = HashMap<Long, String>()
 
     private var recyclerViewState: Parcelable? = null
@@ -52,6 +53,11 @@ abstract class BaseConversationsAdapter(
         setupDragListener(true)
         setHasStableIds(true)
         updateDrafts()
+        // sms-man: change the text size with two fingers
+        PinchTextSize.setup(recyclerView, activity.config::conversationsTextScale) { scale ->
+            fontSize = activity.getTextSize() * scale
+            notifyItemRangeChanged(0, itemCount, PinchTextSize.Payload)
+        }
 
         registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onChanged() = restoreRecyclerViewState()
@@ -65,7 +71,7 @@ abstract class BaseConversationsAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateFontSize() {
-        fontSize = activity.getTextSize()
+        fontSize = activity.getTextSize() * activity.config.conversationsTextScale
         notifyDataSetChanged()
     }
 
@@ -110,6 +116,21 @@ abstract class BaseConversationsAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemConversationBinding.inflate(layoutInflater, parent, false)
         return createViewHolder(binding.root)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        when {
+            PinchTextSize.isOnlyTextSize(payloads) -> updateTextSize(ItemConversationBinding.bind(holder.itemView))
+            PinchTextSize.Payload in payloads -> onBindViewHolder(holder, position)
+            else -> super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
+    // sms-man: the same sizes as in setupView
+    private fun updateTextSize(binding: ItemConversationBinding) = binding.apply {
+        conversationAddress.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize * 1.2f)
+        conversationBodyShort.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize * 0.9f)
+        conversationDate.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSize * 0.8f)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

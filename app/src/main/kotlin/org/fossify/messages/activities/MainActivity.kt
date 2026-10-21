@@ -84,6 +84,7 @@ class MainActivity : SimpleActivity() {
 
     private var storedTextColor = 0
     private var storedFontSize = 0
+    private var storedTextScale = 1f
     private var lastSearchedText = ""
     private var bus: EventBus? = null
 
@@ -121,7 +122,8 @@ class MainActivity : SimpleActivity() {
                 updateTextColor(getProperTextColor())
             }
 
-            if (storedFontSize != config.fontSize) {
+            // sms-man: also when the list text size was changed with two fingers in another list
+            if (storedFontSize != config.fontSize || storedTextScale != config.conversationsTextScale) {
                 updateFontSize()
             }
 
@@ -216,6 +218,7 @@ class MainActivity : SimpleActivity() {
     private fun storeStateVariables() {
         storedTextColor = getProperTextColor()
         storedFontSize = config.fontSize
+        storedTextScale = config.conversationsTextScale
     }
 
     private fun updateMenuColors() {

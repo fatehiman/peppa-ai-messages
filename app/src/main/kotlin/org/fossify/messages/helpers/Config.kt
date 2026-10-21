@@ -242,6 +242,21 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(BUBBLE_NOTIFICATIONS, true)
         set(bubbleNotifications) = prefs.edit().putBoolean(BUBBLE_NOTIFICATIONS, bubbleNotifications).apply()
 
+    /** sms-man: change the text size with two fingers (pinch), see [PinchTextSize]. */
+    var pinchTextSize: Boolean
+        get() = prefs.getBoolean(PINCH_TEXT_SIZE, true)
+        set(pinchTextSize) = prefs.edit().putBoolean(PINCH_TEXT_SIZE, pinchTextSize).apply()
+
+    /** Text size of the conversation screen = font size × this. */
+    var threadTextScale: Float
+        get() = prefs.getFloat(THREAD_TEXT_SCALE, 1f)
+        set(threadTextScale) = prefs.edit().putFloat(THREAD_TEXT_SCALE, threadTextScale).apply()
+
+    /** Text size of the conversation lists (main, archived, recycle bin) = font size × this. */
+    var conversationsTextScale: Float
+        get() = prefs.getFloat(CONVERSATIONS_TEXT_SCALE, 1f)
+        set(conversationsTextScale) = prefs.edit().putFloat(CONVERSATIONS_TEXT_SCALE, conversationsTextScale).apply()
+
     /** Senders that always go to the inbox, never to the API. "Not spam" adds the sender here. */
     val allowedNumbers: Set<String>
         get() = getKeywordList(KeywordList.ALLOWED_NUMBERS)
