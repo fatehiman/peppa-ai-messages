@@ -130,7 +130,7 @@ Content-Type: application/json; charset=utf-8
 | --- | --- | --- |
 | `sender` | string | The sender the user reported. |
 | `spam` | boolean | `true` = the user says this sender sends spam ("Report as spam"). `false` = the user says it is not spam ("Not spam"). |
-| `body` | string | The SMS text for "Not spam". Empty for "Report as spam". You can log it; do not trust it. |
+| `body` | string | The SMS text for "Not spam". Empty for "Report as spam". Do not trust it. It is sent only for possible later use; the author's server does not save it. |
 
 **Answer**: any `2xx` means success. The body is not read. Example:
 
@@ -139,6 +139,8 @@ Content-Type: application/json; charset=utf-8
 ```
 
 A typical server adds the sender to its blocked list on `spam: true` and removes it on `spam: false`.
+For "Not spam" only the sender can be fixed: the text was judged by the AI model, which has no list to
+change. So the server removes the sender from its blocked list (if it is there) and keeps nothing else.
 If the call fails, the app shows a short message with the error. The local action (moving the
 message) is already done.
 
