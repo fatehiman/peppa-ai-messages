@@ -9,6 +9,7 @@ import org.fossify.commons.extensions.value
 import org.fossify.messages.databinding.DialogAddBlockedKeywordBinding
 import org.fossify.messages.extensions.config
 import org.fossify.messages.helpers.KeywordList
+import org.fossify.messages.helpers.NumberRules
 
 class AddBlockedKeywordDialog(
     val activity: BaseSimpleActivity,
@@ -31,7 +32,15 @@ class AddBlockedKeywordDialog(
                 activity.setupDialogStuff(binding.root, this) { alertDialog ->
                     alertDialog.showKeyboard(binding.addBlockedKeywordEdittext)
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        val newBlockedKeyword = binding.addBlockedKeywordEdittext.value
+                        val newBlockedKeyword = binding.addBlockedKeywordEdittext.value.trim()
+                        if (list.isNumberList && newBlockedKeyword.isNotEmpty() && newBlockedKeyword != originalKeyword) {
+                            // sms-man: no duplicates and no overlapping prefixes, in both number lists
+                            val error = NumberRules.findConflict(activity, list, newBlockedKeyword, originalKeyword)
+                            if (error != null) {
+                                binding.addBlockedKeywordEdittext.error = error
+                                return@setOnClickListener
+                            }
+                        }
                         if (originalKeyword != null && newBlockedKeyword != originalKeyword) {
                             activity.config.removeFromKeywordList(list, originalKeyword)
                         }

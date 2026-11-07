@@ -404,6 +404,15 @@ open class ThreadActivity : SimpleActivity() {
         }
         // sms-man: tapping the title (contact name) opens the contact in the phone's contacts app
         binding.threadToolbar.setOnClickListener { openTitleContact() }
+        // sms-man: long press on the title copies the number
+        binding.threadToolbar.setOnLongClickListener {
+            if (participants.size == 1 && !isRecycleBin && !isSpecialNumber()) {
+                copyNumberToClipboard()
+                true
+            } else {
+                false
+            }
+        }
     }
 
     /**
@@ -1375,8 +1384,9 @@ open class ThreadActivity : SimpleActivity() {
     private fun addNumberToContact() {
         val phoneNumber =
             participants.firstOrNull()?.phoneNumbers?.firstOrNull()?.normalizedNumber ?: return
+        // sms-man: always create a new contact (the contacts app can merge it into an existing one)
         Intent().apply {
-            action = Intent.ACTION_INSERT_OR_EDIT
+            action = Intent.ACTION_INSERT
             type = "vnd.android.cursor.item/contact"
             putExtra(KEY_PHONE, phoneNumber)
             launchActivityIntent(this)

@@ -23,7 +23,11 @@ class BlockedKeywordsImporter(
             }
             if (keywords.isNotEmpty()) {
                 keywords.forEach { keyword: String ->
-                    activity.config.addToKeywordList(list, keyword)
+                    val value = keyword.trim()
+                    if (value.isEmpty()) return@forEach
+                    // sms-man: numbers that conflict with an existing entry are skipped
+                    if (list.isNumberList && NumberRules.findConflict(activity, list, value) != null) return@forEach
+                    activity.config.addToKeywordList(list, value)
                 }
                 ImportResult.IMPORT_OK
             } else {

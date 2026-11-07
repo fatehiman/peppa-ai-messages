@@ -257,6 +257,16 @@
     <string name="number_or_sender_name">Number or sender name</string>
     <string name="no_allowed_numbers">No allowed numbers. Messages from these numbers always go to the inbox and are never sent to the spam API. “Not spam” adds the sender here.</string>
     <string name="no_allowed_keywords">No allowed keywords. Messages that contain one of these words always go to the inbox and are never sent to the spam API.</string>
+    <string name="manage_blocked_numbers_title">Manage blocked numbers</string>
+    <string name="blocked_numbers_file">Blocked numbers</string>
+    <string name="add_a_blocked_number">Add a blocked number</string>
+    <string name="number_or_prefix_hint">Number, prefix like 091*, or sender name</string>
+    <string name="no_blocked_numbers">No blocked numbers. Use * at the end to block a prefix, for example 091*.</string>
+    <string name="conflict_same_list">“%1$s” is already covered by “%2$s” in this list</string>
+    <string name="conflict_other_list">Conflicts with “%1$s” in %2$s</string>
+    <string name="list_allowed_numbers">allowed numbers</string>
+    <string name="list_blocked_numbers">blocked numbers</string>
+    <string name="wildcard_only_end">* can only be used at the end, for example 091*</string>
     <string name="import_from_file">Import from a file</string>
     <string name="export_to_file">Export to a file</string>
     <string name="old_messages">Old messages</string>

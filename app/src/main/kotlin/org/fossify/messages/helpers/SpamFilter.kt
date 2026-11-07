@@ -2,11 +2,13 @@ package org.fossify.messages.helpers
 
 import android.content.Context
 import org.fossify.commons.extensions.baseConfig
+import org.fossify.commons.extensions.getBlockedNumbers
 import org.fossify.commons.extensions.getMyContactsCursor
 import org.fossify.commons.extensions.isNumberBlocked
 import org.fossify.commons.helpers.ContactLookupResult
 import org.fossify.commons.helpers.SimpleContactsHelper
 import org.fossify.messages.extensions.config
+import org.fossify.messages.extensions.conversationsDB
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URI
@@ -65,14 +67,23 @@ object SpamFilter {
      * Is [address] in the "allowed numbers" list? Exact match (after [normalizeSender]), or for phone
      * numbers the same last 10 digits, so 09121234567 matches +989121234567. Short codes: exact only.
      */
-    fun isAllowedNumber(context: Context, address: String): Boolean {
-        val sender = normalizeSender(address)
-        return context.config.allowedNumbers.any { entry ->
-            val allowed = normalizeSender(entry)
-            allowed == sender || (allowed.length >= PHONE_DIGITS && sender.length >= PHONE_DIGITS &&
-                allowed.all { it.isDigit() } && sender.all { it.isDigit() } &&
-                allowed.takeLast(PHONE_DIGITS) == sender.takeLast(PHONE_DIGITS))
+    fun isAllowedNumber(context: Context, address: String): Boolean =
+        context.config.allowedNumbers.any { NumberRules.matches(it, address) }
+
+    /** Blocked numbers incl. prefixes like 091* (Android's block list itself only knows exact numbers). */
+    private fun isBlockedByPrefix(context: Context, address: String): Boolean = try {
+        context.getBlockedNumbers().any { NumberRules.matches(it.number, address) }
+    } catch (_: Exception) {
+        false
+    }
+
+    /** Do I already have a conversation with this sender (I wrote to them, or they wrote before)? */
+    fun hasConversationWith(context: Context, address: String): Boolean = try {
+        context.conversationsDB.getAllPhoneNumbers().any { stored ->
+            stored.split(',').any { it.isNotBlank() && NumberRules.matches(it.trim(), address) }
         }
+    } catch (_: Exception) {
+        false
     }
 
     sealed class Decision {
@@ -84,7 +95,8 @@ object SpamFilter {
      * Where does a new incoming SMS go? Blocking (it may call the API); call it from a background thread.
      * The order of the rules matters: "allowed" rules come before "blocked" rules.
      *  1. contact (setting, on by default)               -> inbox
-     *  2. allowed number / allowed keyword               -> inbox
+     *  2. allowed number (also 091* prefixes) / allowed keyword /
+     *     a conversation with this sender already exists  -> inbox
      *  3. looks like a login code (setting, on)          -> inbox
      *  4. blocked number / blocked keyword /
      *     "block unknown numbers" + not a contact        -> spam folder
@@ -103,13 +115,14 @@ object SpamFilter {
         val isAllowed = when {
             config.spamSkipContacts && contactResult is ContactLookupResult.Found -> true
             isAllowedNumber(context, address) -> true
+            hasConversationWith(context, address) -> true
             config.allowedKeywords.any { it.isNotEmpty() && body.contains(it, ignoreCase = true) } -> true
             config.spamSkipCodes && looksLikeCode(body) -> true
             else -> false
         }
         if (isAllowed) return Decision.Inbox
 
-        if (context.isNumberBlocked(address)) return Decision.Spam(REASON_BLOCKED_NUMBER, null)
+        if (context.isNumberBlocked(address) || isBlockedByPrefix(context, address)) return Decision.Spam(REASON_BLOCKED_NUMBER, null)
         ReceiverUtils.findBlockedKeyword(context, body)?.let {
             return Decision.Spam(REASON_BLOCKED_KEYWORD_PREFIX + it, null)
         }

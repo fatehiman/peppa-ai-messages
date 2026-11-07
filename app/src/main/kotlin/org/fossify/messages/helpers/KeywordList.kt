@@ -42,7 +42,19 @@ enum class KeywordList(
         R.string.add_an_allowed_number,
         R.string.number_or_sender_name,
         R.string.allowed_numbers
+    ),
+
+    // stored in Android's system block list (see Config.getKeywordList), not in our preferences
+    BLOCKED_NUMBERS(
+        "",
+        R.string.manage_blocked_numbers_title,
+        R.string.no_blocked_numbers,
+        R.string.add_a_blocked_number,
+        R.string.number_or_prefix_hint,
+        R.string.blocked_numbers_file
     );
+
+    val isNumberList get() = this == ALLOWED_NUMBERS || this == BLOCKED_NUMBERS
 
     companion object {
         fun fromName(name: String?) = entries.firstOrNull { it.name == name } ?: BLOCKED_KEYWORDS

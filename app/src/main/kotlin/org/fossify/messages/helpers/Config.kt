@@ -1,6 +1,9 @@
 package org.fossify.messages.helpers
 
 import android.content.Context
+import org.fossify.commons.extensions.addBlockedNumber
+import org.fossify.commons.extensions.deleteBlockedNumber
+import org.fossify.commons.extensions.getBlockedNumbers
 import org.fossify.commons.helpers.BaseConfig
 import org.fossify.messages.extensions.getDefaultKeyboardHeight
 import org.fossify.messages.models.Conversation
@@ -214,14 +217,31 @@ class Config(context: Context) : BaseConfig(context) {
             .coerceIn(MIN_SPAM_API_TIMEOUT_SECS, MAX_SPAM_API_TIMEOUT_SECS)
         set(spamApiTimeoutSecs) = prefs.edit().putInt(SPAM_API_TIMEOUT, spamApiTimeoutSecs).apply()
 
-    fun getKeywordList(list: KeywordList): Set<String> = prefs.getStringSet(list.prefKey, HashSet<String>())!!
+    fun getKeywordList(list: KeywordList): Set<String> =
+        if (list == KeywordList.BLOCKED_NUMBERS) {
+            try {
+                context.getBlockedNumbers().map { it.number }.toSet()
+            } catch (_: Exception) {
+                emptySet()
+            }
+        } else {
+            prefs.getStringSet(list.prefKey, HashSet<String>())!!
+        }
 
     fun addToKeywordList(list: KeywordList, value: String) {
-        prefs.edit().putStringSet(list.prefKey, getKeywordList(list).plus(value)).apply()
+        if (list == KeywordList.BLOCKED_NUMBERS) {
+            context.addBlockedNumber(value)
+        } else {
+            prefs.edit().putStringSet(list.prefKey, getKeywordList(list).plus(value)).apply()
+        }
     }
 
     fun removeFromKeywordList(list: KeywordList, value: String) {
-        prefs.edit().putStringSet(list.prefKey, getKeywordList(list).minus(value)).apply()
+        if (list == KeywordList.BLOCKED_NUMBERS) {
+            context.deleteBlockedNumber(value)
+        } else {
+            prefs.edit().putStringSet(list.prefKey, getKeywordList(list).minus(value)).apply()
+        }
     }
 
     // sms-man: delete messages older than [autoDeleteOldDays] days, once a day, without asking

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import org.fossify.commons.activities.ManageBlockedNumbersActivity
 import org.fossify.commons.dialogs.ChangeDateTimeFormatDialog
 import org.fossify.commons.dialogs.ConfirmationDialog
 import org.fossify.commons.dialogs.RadioGroupDialog
@@ -230,12 +229,11 @@ class SettingsActivity : SimpleActivity() {
 
     private fun setupManageBlockedNumbers() = binding.apply {
         settingsManageBlockedNumbers.text =
-            getString(org.fossify.commons.R.string.manage_blocked_numbers)
+            getString(R.string.manage_blocked_numbers_title)
         settingsManageBlockedNumbersHolder.beVisible()
         settingsManageBlockedNumbersHolder.setOnClickListener {
-            Intent(this@SettingsActivity, ManageBlockedNumbersActivity::class.java).apply {
-                startActivity(this)
-            }
+            // sms-man: our own screen (prefixes like 091*, conflict checks) on top of Android's block list
+            openKeywordList(KeywordList.BLOCKED_NUMBERS)
         }
     }
 

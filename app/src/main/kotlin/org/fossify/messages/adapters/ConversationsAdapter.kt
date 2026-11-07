@@ -273,7 +273,7 @@ class ConversationsAdapter(
     private fun addNumberToContact() {
         val conversation = getSelectedItems().firstOrNull() ?: return
         Intent().apply {
-            action = Intent.ACTION_INSERT_OR_EDIT
+            action = Intent.ACTION_INSERT
             type = "vnd.android.cursor.item/contact"
             putExtra(KEY_PHONE, conversation.phoneNumber)
             activity.launchActivityIntent(this)

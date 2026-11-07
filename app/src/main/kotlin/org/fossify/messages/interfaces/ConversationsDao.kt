@@ -33,6 +33,10 @@ interface ConversationsDao {
         return getAllWithMessagesInRecycleBinWithLatestSnippet().map { it.toConversation() }
     }
 
+    // sms-man: phone numbers of all conversations (also archived), used to skip the spam check
+    @Query("SELECT phone_number FROM conversations")
+    fun getAllPhoneNumbers(): List<String>
+
     @Query("SELECT * FROM conversations WHERE thread_id = :threadId")
     fun getConversationWithThreadId(threadId: Long): Conversation?
 
