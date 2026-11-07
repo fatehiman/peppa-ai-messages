@@ -1,0 +1,5 @@
+{
+    "env":  {
+                "ANTHROPIC_AUTH_TOKEN":  "sk-proj-c74b2b25d767f38da668eca7c78e91b3"
+            }
+}

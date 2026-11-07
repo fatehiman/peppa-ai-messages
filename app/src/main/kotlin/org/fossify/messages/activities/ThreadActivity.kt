@@ -1387,7 +1387,7 @@ open class ThreadActivity : SimpleActivity() {
         // sms-man: always create a new contact (the contacts app can merge it into an existing one)
         Intent().apply {
             action = Intent.ACTION_INSERT
-            type = "vnd.android.cursor.item/contact"
+            type = ContactsContract.Contacts.CONTENT_TYPE
             putExtra(KEY_PHONE, phoneNumber)
             launchActivityIntent(this)
         }

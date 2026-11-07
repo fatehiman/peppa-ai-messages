@@ -1,5 +1,6 @@
 package org.fossify.messages.adapters
 
+import android.provider.ContactsContract
 import android.content.Intent
 import android.text.TextUtils
 import android.view.Menu
@@ -274,7 +275,7 @@ class ConversationsAdapter(
         val conversation = getSelectedItems().firstOrNull() ?: return
         Intent().apply {
             action = Intent.ACTION_INSERT
-            type = "vnd.android.cursor.item/contact"
+            type = ContactsContract.Contacts.CONTENT_TYPE
             putExtra(KEY_PHONE, conversation.phoneNumber)
             activity.launchActivityIntent(this)
         }
