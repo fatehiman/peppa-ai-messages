@@ -257,6 +257,24 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getLong(LAST_AUTO_DELETE_OLD, 0L)
         set(lastAutoDeleteOld) = prefs.edit().putLong(LAST_AUTO_DELETE_OLD, lastAutoDeleteOld).apply()
 
+    /**
+     * sms-man: a sender with a conversation skips the spam check only if that conversation had a message in the
+     * last [spamSkipConversationDays] days (0 = any age). A sender I wrote to always skips it. See [SpamFilter].
+     */
+    var spamSkipConversationDays: Int
+        get() = prefs.getInt(SPAM_SKIP_CONVERSATION_DAYS, DEFAULT_SPAM_SKIP_CONVERSATION_DAYS).coerceAtLeast(0)
+        set(spamSkipConversationDays) = prefs.edit().putInt(SPAM_SKIP_CONVERSATION_DAYS, spamSkipConversationDays).apply()
+
+    /** sms-man: play the default notification sound again every [repeatNotificationMinutes] while unread. */
+    var repeatNotificationSound: Boolean
+        get() = prefs.getBoolean(REPEAT_NOTIFICATION_SOUND, false)
+        set(repeatNotificationSound) = prefs.edit().putBoolean(REPEAT_NOTIFICATION_SOUND, repeatNotificationSound).apply()
+
+    var repeatNotificationMinutes: Int
+        get() = prefs.getInt(REPEAT_NOTIFICATION_MINUTES, DEFAULT_REPEAT_NOTIFICATION_MINUTES)
+            .coerceIn(1, MAX_REPEAT_NOTIFICATION_MINUTES)
+        set(repeatNotificationMinutes) = prefs.edit().putInt(REPEAT_NOTIFICATION_MINUTES, repeatNotificationMinutes).apply()
+
     /** sms-man: show new messages as floating chat bubbles (Android 11+, if Android allows bubbles). */
     var bubbleNotifications: Boolean
         get() = prefs.getBoolean(BUBBLE_NOTIFICATIONS, true)

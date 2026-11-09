@@ -194,6 +194,11 @@
 
     <!-- sms-man: floating chat bubbles -->
     <string name="bubble_notifications">Show new messages as floating bubbles</string>
+    <string name="repeat_notification_sound">Repeat the notification sound while messages are unread</string>
+    <string name="repeat_notification_every">Repeat every</string>
+    <string name="repeat_minutes_count">%d minutes</string>
+    <string name="repeat_minutes_hint">Minutes</string>
+    <string name="repeat_notification_minutes_invalid">Enter a number from 1 to 1440</string>
     <string name="bubbles_not_allowed">Android does not allow bubbles for this app yet.\n\nIn the next screen allow bubbles (\"All conversations\").\n\nOn Samsung also check: Settings → Notifications → Advanced settings → Floating notifications → Bubbles.\n\nBubbles work only when \"Lock screen notification visibility\" is \"Sender and message\".</string>
     <string name="open_settings">Open settings</string>
 
@@ -209,6 +214,10 @@
     <string name="spam_token_set">Set (ends with …%s)</string>
     <string name="spam_skip_contacts">Never check messages from my contacts</string>
     <string name="spam_skip_codes">Never check messages that look like login codes</string>
+    <string name="spam_skip_conversation_days">Never check senders I have a conversation with, if it has a message from the last</string>
+    <string name="spam_skip_conversation_days_hint">Days (empty = all conversations)</string>
+    <string name="spam_skip_conversation_all">All conversations (any age)</string>
+    <string name="spam_skip_conversation_days_invalid">Enter a number from 1 to 3650, or leave it empty for all conversations</string>
     <string name="spam_test_connection">Test the connection</string>
     <string name="spam_testing">Testing…</string>
     <string name="spam_test_ok">Works. A test message got: spam = %1$s (answer in %2$s s)</string>

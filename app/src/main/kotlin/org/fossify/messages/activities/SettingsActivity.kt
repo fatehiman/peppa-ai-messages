@@ -49,6 +49,10 @@ import org.fossify.messages.extensions.emptyMessagesRecycleBin
 import org.fossify.messages.extensions.messagesDB
 import org.fossify.messages.extensions.notificationHelper
 import org.fossify.messages.helpers.CallLogNotes
+import org.fossify.messages.helpers.DEFAULT_REPEAT_NOTIFICATION_MINUTES
+import org.fossify.messages.helpers.MAX_REPEAT_NOTIFICATION_MINUTES
+import org.fossify.messages.helpers.MAX_SPAM_SKIP_CONVERSATION_DAYS
+import org.fossify.messages.helpers.RepeatNotificationSound
 import org.fossify.messages.helpers.FILE_SIZE_100_KB
 import org.fossify.messages.helpers.FILE_SIZE_1_MB
 import org.fossify.messages.helpers.FILE_SIZE_200_KB
@@ -140,6 +144,7 @@ class SettingsActivity : SimpleActivity() {
         setupAutoDeleteOld()
         setupLockScreenVisibility()
         setupBubbleNotifications()
+        setupRepeatNotification()
         setupMMSFileSizeLimit()
         setupUseRecycleBin()
         setupEmptyRecycleBin()
@@ -418,6 +423,26 @@ class SettingsActivity : SimpleActivity() {
 
         settingsSpamTestHolder.setOnClickListener { testSpamApi() }
 
+        updateSpamSkipConversationText()
+        settingsSpamSkipConversationDaysHolder.setOnClickListener {
+            val days = config.spamSkipConversationDays
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.spam_skip_conversation_days,
+                value = if (days == 0) "" else days.toString(),
+                hint = getString(R.string.spam_skip_conversation_days_hint),
+                isSecret = false,
+                isNumber = true,
+                validate = { value ->
+                    if (value.toIntOrNull() in 1..MAX_SPAM_SKIP_CONVERSATION_DAYS) null
+                    else getString(R.string.spam_skip_conversation_days_invalid)
+                }
+            ) { value ->
+                config.spamSkipConversationDays = value.toIntOrNull() ?: 0 // empty = all conversations
+                updateSpamSkipConversationText()
+            }
+        }
+
     }
 
     private fun updateSpamTexts() = binding.apply {
@@ -429,6 +454,12 @@ class SettingsActivity : SimpleActivity() {
         settingsSpamTimeout.text = getString(R.string.spam_api_timeout_value, config.spamApiTimeoutSecs)
         settingsSpamTest.text = ""
         settingsSpamTest.beGone()
+    }
+
+    private fun updateSpamSkipConversationText() {
+        val days = config.spamSkipConversationDays
+        binding.settingsSpamSkipConversationDays.text =
+            if (days == 0) getString(R.string.spam_skip_conversation_all) else getString(R.string.days_count, days)
     }
 
     private fun testSpamApi() {
@@ -681,6 +712,40 @@ class SettingsActivity : SimpleActivity() {
                         toast(org.fossify.commons.R.string.no_app_found)
                     }
                 }
+            }
+        }
+    }
+
+    // sms-man: play the notification sound again every N minutes while messages are unread
+    private fun setupRepeatNotification() = binding.apply {
+        settingsRepeatNotification.isChecked = config.repeatNotificationSound
+        settingsRepeatNotificationMinutesHolder.beVisibleIf(config.repeatNotificationSound)
+        settingsRepeatNotificationMinutes.text = getString(R.string.repeat_minutes_count, config.repeatNotificationMinutes)
+
+        settingsRepeatNotificationHolder.setOnClickListener {
+            settingsRepeatNotification.toggle()
+            config.repeatNotificationSound = settingsRepeatNotification.isChecked
+            settingsRepeatNotificationMinutesHolder.beVisibleIf(config.repeatNotificationSound)
+            RepeatNotificationSound.schedule(this@SettingsActivity) // off = cancel
+        }
+
+        settingsRepeatNotificationMinutesHolder.setOnClickListener {
+            SpamSettingDialog(
+                activity = this@SettingsActivity,
+                titleId = R.string.repeat_notification_every,
+                value = config.repeatNotificationMinutes.toString(),
+                hint = getString(R.string.repeat_minutes_hint),
+                isSecret = false,
+                isNumber = true,
+                validate = { value ->
+                    if (value.toIntOrNull() in 1..MAX_REPEAT_NOTIFICATION_MINUTES) null
+                    else getString(R.string.repeat_notification_minutes_invalid)
+                }
+            ) { value ->
+                val minutes = value.toIntOrNull() ?: DEFAULT_REPEAT_NOTIFICATION_MINUTES // empty = default
+                config.repeatNotificationMinutes = minutes
+                settingsRepeatNotificationMinutes.text = getString(R.string.repeat_minutes_count, minutes)
+                RepeatNotificationSound.schedule(this@SettingsActivity)
             }
         }
     }

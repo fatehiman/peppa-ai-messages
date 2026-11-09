@@ -79,6 +79,17 @@ const val AUTO_DELETE_OLD_DAYS = "auto_delete_old_days"
 const val LAST_AUTO_DELETE_OLD = "last_auto_delete_old"
 const val DEFAULT_AUTO_DELETE_OLD_DAYS = 90
 
+// sms-man: skip the spam check only for conversations with a message in the last N days (0 = any age)
+const val SPAM_SKIP_CONVERSATION_DAYS = "spam_skip_conversation_days"
+const val DEFAULT_SPAM_SKIP_CONVERSATION_DAYS = 30
+const val MAX_SPAM_SKIP_CONVERSATION_DAYS = 3650
+
+// sms-man: play the notification sound again every N minutes while there are unread messages
+const val REPEAT_NOTIFICATION_SOUND = "repeat_notification_sound"
+const val REPEAT_NOTIFICATION_MINUTES = "repeat_notification_minutes"
+const val DEFAULT_REPEAT_NOTIFICATION_MINUTES = 5
+const val MAX_REPEAT_NOTIFICATION_MINUTES = 24 * 60
+
 // sms-man: floating chat bubbles for new messages
 const val BUBBLE_NOTIFICATIONS = "bubble_notifications"
 

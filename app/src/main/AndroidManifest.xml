@@ -13,6 +13,9 @@
     <uses-permission android:name="android.provider.Telephony.SMS_RECEIVED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- sms-man: exact alarms without asking (repeat notification sound, scheduled messages); app is not on Google Play -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -250,6 +253,10 @@
 
         <receiver
             android:name=".receivers.ScheduledMessageReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receivers.RepeatNotificationReceiver"
             android:exported="false" />
 
         <receiver

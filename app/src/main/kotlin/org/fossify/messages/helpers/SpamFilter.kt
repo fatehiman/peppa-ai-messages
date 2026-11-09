@@ -1,6 +1,9 @@
 package org.fossify.messages.helpers
 
 import android.content.Context
+import android.net.Uri
+import android.provider.BaseColumns
+import android.provider.Telephony
 import org.fossify.commons.extensions.baseConfig
 import org.fossify.commons.extensions.getBlockedNumbers
 import org.fossify.commons.extensions.getMyContactsCursor
@@ -35,6 +38,7 @@ object SpamFilter {
 
     // Phone numbers are compared by their last 10 digits (shorter ones are short codes: exact match only).
     private const val PHONE_DIGITS = 10
+    private const val DAY_MS = 24L * 60 * 60 * 1000
 
     // Reasons saved with a spam message. The API adds its own: sender, phrase, ai.
     const val REASON_REPORT = "report"
@@ -77,14 +81,48 @@ object SpamFilter {
         false
     }
 
-    /** Do I already have a conversation with this sender (I wrote to them, or they wrote before)? */
+    /**
+     * Is this sender someone I talk to? true when a conversation with the sender exists (also archived) and
+     *  - I sent a message in it (any age; a number I wrote to is a real person), or
+     *  - it has a message from the last [Config.spamSkipConversationDays] days (0 = any age).
+     * An old conversation that has only old received texts does not count: it can be an old spam that came
+     * before this app was installed.
+     */
     fun hasConversationWith(context: Context, address: String): Boolean = try {
-        context.conversationsDB.getAllPhoneNumbers().any { stored ->
-            stored.split(',').any { it.isNotBlank() && NumberRules.matches(it.trim(), address) }
+        val threadIds = context.conversationsDB.getAllThreadNumbers().filter { conv ->
+            conv.phoneNumber.split(',').any { it.isNotBlank() && NumberRules.matches(it.trim(), address) }
+        }.map { it.threadId }.distinct()
+
+        when {
+            threadIds.isEmpty() -> false
+            hasSentMessage(context, threadIds) -> true
+            else -> {
+                val days = context.config.spamSkipConversationDays
+                days == 0 || hasMessageSince(context, threadIds, System.currentTimeMillis() - days * DAY_MS)
+            }
         }
     } catch (_: Exception) {
         false
     }
+
+    private fun hasSentMessage(context: Context, threadIds: List<Long>): Boolean {
+        val inThreads = "${Telephony.Sms.THREAD_ID} IN (${threadIds.joinToString(",")})"
+        val sentSms = listOf(
+            Telephony.Sms.MESSAGE_TYPE_SENT, Telephony.Sms.MESSAGE_TYPE_OUTBOX, Telephony.Sms.MESSAGE_TYPE_QUEUED
+        ).joinToString(",")
+        return exists(context, Telephony.Sms.CONTENT_URI, "$inThreads AND ${Telephony.Sms.TYPE} IN ($sentSms)") ||
+            exists(context, Telephony.Mms.CONTENT_URI, "$inThreads AND ${Telephony.Mms.MESSAGE_BOX}=${Telephony.Mms.MESSAGE_BOX_SENT}")
+    }
+
+    private fun hasMessageSince(context: Context, threadIds: List<Long>, sinceMs: Long): Boolean {
+        val inThreads = "${Telephony.Sms.THREAD_ID} IN (${threadIds.joinToString(",")})"
+        // SMS dates are in milliseconds, MMS dates in seconds
+        return exists(context, Telephony.Sms.CONTENT_URI, "$inThreads AND ${Telephony.Sms.DATE} >= $sinceMs") ||
+            exists(context, Telephony.Mms.CONTENT_URI, "$inThreads AND ${Telephony.Mms.DATE} >= ${sinceMs / 1000}")
+    }
+
+    private fun exists(context: Context, uri: Uri, selection: String): Boolean =
+        context.contentResolver.query(uri, arrayOf(BaseColumns._ID), selection, null, null)?.use { it.count > 0 } ?: false
 
     sealed class Decision {
         object Inbox : Decision()
@@ -96,7 +134,8 @@ object SpamFilter {
      * The order of the rules matters: "allowed" rules come before "blocked" rules.
      *  1. contact (setting, on by default)               -> inbox
      *  2. allowed number (also 091* prefixes) / allowed keyword /
-     *     a conversation with this sender already exists  -> inbox
+     *     a conversation where I wrote to the sender, or with a
+     *     message in the last N days (setting, 30; 0 = any) -> inbox
      *  3. looks like a login code (setting, on)          -> inbox
      *  4. blocked number / blocked keyword /
      *     "block unknown numbers" + not a contact        -> spam folder

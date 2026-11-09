@@ -293,6 +293,22 @@ class NotificationHelper(private val context: Context) {
             .forEach { notificationManager.cancel(it.tag, it.id) }
     }
 
+    /**
+     * sms-man: is a new-message notification of an unread conversation still shown (not swiped away)?
+     * Used by [RepeatNotificationSound]. Call it on a background thread.
+     */
+    fun hasUnreadMessageNotification(): Boolean {
+        val shown = notificationManager.activeNotifications.mapNotNull {
+            val threadId = it.notification.shortcutId?.toLongOrNull() ?: return@mapNotNull null
+            // a bubble whose notification was swiped away stays active, but with the notification hidden
+            val hidden = isRPlus() && it.notification.bubbleMetadata?.isNotificationSuppressed == true
+            if (it.id == threadId.hashCode() && !hidden) threadId else null
+        }
+        if (shown.isEmpty()) return false
+        val unread = getUnreadThreadIds()
+        return shown.any { it in unread }
+    }
+
     private fun getUnreadThreadIds(): Set<Long> {
         val ids = HashSet<Long>()
         val sms = Telephony.Sms.CONTENT_URI to

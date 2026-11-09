@@ -52,6 +52,7 @@ import org.fossify.commons.models.SimpleContact
 import org.fossify.messages.R
 import org.fossify.messages.activities.ThreadActivity
 import org.fossify.messages.databases.MessagesDatabase
+import org.fossify.messages.helpers.RepeatNotificationSound
 import org.fossify.messages.helpers.AttachmentUtils.parseAttachmentNames
 import org.fossify.messages.helpers.Config
 import org.fossify.messages.helpers.FILE_SIZE_NONE
@@ -1099,6 +1100,7 @@ fun Context.showReceivedMessageNotification(
             bitmap = bitmap,
             sender = senderName
         )
+        RepeatNotificationSound.schedule(this) // sms-man: play the sound again in N minutes if still unread
     }
 }
 

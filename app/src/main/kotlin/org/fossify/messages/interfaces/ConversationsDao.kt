@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import org.fossify.messages.models.Conversation
 import org.fossify.messages.models.ConversationWithSnippetOverride
+import org.fossify.messages.models.ThreadNumber
 
 @Dao
 interface ConversationsDao {
@@ -33,9 +34,9 @@ interface ConversationsDao {
         return getAllWithMessagesInRecycleBinWithLatestSnippet().map { it.toConversation() }
     }
 
-    // sms-man: phone numbers of all conversations (also archived), used to skip the spam check
-    @Query("SELECT phone_number FROM conversations")
-    fun getAllPhoneNumbers(): List<String>
+    // sms-man: thread ids + phone numbers of all conversations (also archived), used to skip the spam check
+    @Query("SELECT thread_id, phone_number FROM conversations")
+    fun getAllThreadNumbers(): List<ThreadNumber>
 
     @Query("SELECT * FROM conversations WHERE thread_id = :threadId")
     fun getConversationWithThreadId(threadId: Long): Conversation?
